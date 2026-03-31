@@ -24,6 +24,11 @@ export default async function AdminDashboard() {
 
   // Fetch active events for the All Events tab
   const allEvents = await prisma.event.findMany({
+    where: {
+      status: {
+        not: "CANCELLED"
+      }
+    },
     orderBy: { eventDate: "asc" },
     include: {
       eventStaff: {
