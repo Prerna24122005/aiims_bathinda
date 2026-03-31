@@ -1,0 +1,294 @@
+"use client";
+
+import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Users, CalendarPlus, ArrowRight, Search, LayoutGrid, List } from "lucide-react";
+import Link from "next/link";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { EventManagementActions } from "@/components/admin/events/EventManagementActions";
+
+type EventType = {
+  id: string;
+  schoolDetails: string;
+  eventDate: Date;
+  status: string;
+  pocName: string;
+  eventHeadName: string;
+  _count: { eventStaff: number; students: number; }
+};
+
+export function EventsTabClient({ events }: { events: EventType[] }) {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"ALL"|"UPCOMING"|"ACTIVE (TODAY)"|"PAST">("ALL");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+
+  // Filter logic
+  const filteredEvents = events.filter(event => {
+    const evDate = new Date(event.eventDate);
+    evDate.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    let dynamicStatus = "UPCOMING";
+    if (evDate.getTime() === today.getTime()) {
+      dynamicStatus = "ACTIVE (TODAY)";
+    } else if (evDate < today) {
+      dynamicStatus = "PAST";
+    }
+
+    // Status matching
+    if (statusFilter !== "ALL" && dynamicStatus !== statusFilter) return false;
+
+    // Search matching
+    const srch = searchQuery.toLowerCase();
+    if (srch && !event.schoolDetails.toLowerCase().includes(srch)) return false;
+
+    return true; 
+  });
+
+  const getDynamicStatus = (date: Date) => {
+    const evDate = new Date(date);
+    evDate.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (evDate.getTime() === today.getTime()) {
+      return "ACTIVE (TODAY)";
+    } else if (evDate < today) {
+      return "PAST";
+    }
+    return "UPCOMING";
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+        <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">Platform Events</h2>
+        
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
+          <div className="relative w-full sm:w-auto">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Input 
+              type="text" 
+              placeholder="Search schools..." 
+              className="pl-10 w-full sm:w-64 bg-slate-50 border-slate-200 focus-visible:ring-emerald-500 rounded-full"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          
+          <div className="w-px h-8 bg-slate-200 hidden sm:block mx-1"></div>
+          
+          <div className="flex gap-1 overflow-x-auto pb-1 sm:pb-0 w-full sm:w-auto justify-start">
+            {["ALL", "ACTIVE (TODAY)", "UPCOMING", "PAST"].map(f => (
+              <Button 
+                key={f} 
+                variant={statusFilter === f ? "default" : "outline"} 
+                size="sm" 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                onClick={() => setStatusFilter(f as any)}
+                className={`whitespace-nowrap transition-all rounded-full ${statusFilter === f ? 'bg-emerald-600 hover:bg-emerald-700 shadow-md' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}`}
+              >
+                {f === "ACTIVE (TODAY)" ? "Active" : f.charAt(0) + f.slice(1).toLowerCase()}
+              </Button>
+            ))}
+          </div>
+
+          <div className="w-px h-8 bg-slate-200 hidden sm:block mx-1"></div>
+
+          <div className="flex bg-slate-100 p-1 rounded-full border border-slate-200 w-full sm:w-auto justify-center">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => setViewMode("grid")}
+              className={`rounded-full px-4 flex items-center gap-2 ${viewMode === "grid" ? 'bg-white shadow-sm text-emerald-600 font-medium' : 'text-slate-500 hover:text-slate-900'}`}
+            >
+              <LayoutGrid className="h-4 w-4" />
+              <span className="hidden sm:inline">Grid</span>
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => setViewMode("list")}
+              className={`rounded-full px-4 flex items-center gap-2 ${viewMode === "list" ? 'bg-white shadow-sm text-emerald-600 font-medium' : 'text-slate-500 hover:text-slate-900'}`}
+            >
+              <List className="h-4 w-4" />
+              <span className="hidden sm:inline">List</span>
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {filteredEvents.length === 0 ? (
+        <Card className="p-16 text-center text-slate-500 border-dashed border-2 bg-slate-50/50">
+          <CalendarPlus className="h-16 w-16 mx-auto mb-6 text-slate-300" />
+          <h3 className="text-xl font-bold text-slate-900 mb-2">No Events Found</h3>
+          <p className="text-slate-600 max-w-sm mx-auto">We couldn&apos;t find any events matching your current filters. Try adjusting your search or clearing the status filter.</p>
+        </Card>
+      ) : viewMode === "grid" ? (
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {filteredEvents.map(event => {
+            const dynamicStatus = getDynamicStatus(event.eventDate);
+            
+            return (
+              <Link href={`/admin/events/${event.id}`} key={event.id} className="group">
+                <Card className="h-full flex flex-col border border-slate-200 hover:border-emerald-300 hover:shadow-xl transition-all duration-300 bg-white overflow-hidden rounded-xl">
+                  <div className={`h-2 w-full ${dynamicStatus.includes("ACTIVE") ? 'bg-emerald-500' : dynamicStatus === "PAST" ? 'bg-slate-300' : 'bg-emerald-500'}`} />
+                  <CardHeader className="pb-3 flex-1 px-6 pt-5">
+                    <div className="flex justify-between items-center mb-4">
+                      <Badge className={`px-3 py-1 font-semibold tracking-wide rounded-full ${
+                        dynamicStatus.includes("ACTIVE") 
+                          ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border-emerald-200' 
+                          : dynamicStatus === "PAST" 
+                            ? 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-200' 
+                            : 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border-emerald-200'
+                      }`}>
+                        {dynamicStatus}
+                      </Badge>
+                      <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200 flex items-center gap-1.5">
+                        <Users className="h-3 w-3" />
+                        {event._count.students} Students
+                      </span>
+                    </div>
+                    <CardTitle className="text-2xl font-black text-slate-900 group-hover:text-emerald-700 transition-colors leading-tight mb-2 flex items-start justify-between">
+                      <span className="line-clamp-2 pr-4">{event.schoolDetails}</span>
+                      <ArrowRight className="h-5 w-5 text-slate-300 group-hover:text-emerald-600 transition-colors shrink-0 mt-0.5 group-hover:translate-x-1" />
+                    </CardTitle>
+                    <CardDescription className="flex items-center gap-2 text-sm font-medium text-slate-500 mt-2">
+                      <div className="bg-slate-100 p-1.5 rounded-md">
+                        <CalendarPlus className="h-4 w-4 text-slate-500" />
+                      </div>
+                      {new Date(event.eventDate).toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}
+                    </CardDescription>
+                    <div className="mt-4 space-y-2">
+                      <div className="flex items-center gap-2 text-xs font-semibold text-slate-600 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100">
+                        <span className="text-emerald-600 uppercase tracking-tighter">POC:</span>
+                        <span className="truncate">{event.pocName}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs font-semibold text-slate-600 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100">
+                        <span className="text-amber-600 uppercase tracking-tighter">Head:</span>
+                        <span className="truncate">{event.eventHeadName}</span>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="px-6 pb-6 pt-2">
+                    <div className="flex items-center justify-between bg-slate-50 p-3 rounded-lg border border-slate-100 group-hover:bg-emerald-50/50 transition-colors">
+                      <div className="flex items-center gap-2.5">
+                        <div className="bg-white p-2 rounded-full shadow-sm border border-slate-100">
+                          <Users className="h-4 w-4 text-emerald-500" />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-xs text-slate-500 font-medium">Assigned Staff</span>
+                          <span className="text-sm font-bold text-slate-900">{event._count.eventStaff} Members</span>
+                        </div>
+                      </div>
+                    </div>
+                    {dynamicStatus === "UPCOMING" && (
+                      <div className="mt-4 pt-4 border-t border-slate-100">
+                        <EventManagementActions 
+                          eventId={event.id} 
+                          currentDate={event.eventDate} 
+                          status={event.status} 
+                          className="justify-between"
+                        />
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </Link>
+            )
+          })}
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {filteredEvents.map(event => {
+            const dynamicStatus = getDynamicStatus(event.eventDate);
+            
+            return (
+              <Link href={`/admin/events/${event.id}`} key={event.id} className="group">
+                <Card className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-5 border border-slate-200 hover:border-emerald-300 hover:shadow-md transition-all duration-200 bg-white rounded-xl overflow-hidden relative">
+                  <div className={`absolute left-0 top-0 bottom-0 w-1 ${dynamicStatus.includes("ACTIVE") ? 'bg-emerald-500' : dynamicStatus === "PAST" ? 'bg-slate-300' : 'bg-emerald-500'}`} />
+                  
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 flex-1 pl-3 w-full">
+                    <div className="min-w-[140px]">
+                      <Badge className={`px-2.5 py-1 text-xs font-semibold rounded-full mb-1 border ${
+                        dynamicStatus.includes("ACTIVE") 
+                          ? 'bg-emerald-100 text-emerald-800 border-emerald-200 hover:bg-emerald-200' 
+                          : dynamicStatus === "PAST" 
+                            ? 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200' 
+                            : 'bg-emerald-100 text-emerald-800 border-emerald-200 hover:bg-emerald-200'
+                      }`}>
+                        {dynamicStatus}
+                      </Badge>
+                      <p className="text-sm font-medium text-slate-500 flex items-center gap-1.5 mt-1.5">
+                        <CalendarPlus className="h-3.5 w-3.5 text-slate-400" />
+                        {new Date(event.eventDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </p>
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-xl font-black text-slate-900 group-hover:text-emerald-700 transition-colors truncate">
+                        {event.schoolDetails}
+                      </h3>
+                      <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5 font-bold uppercase tracking-tighter text-[10px]">
+                        <div className="flex items-center gap-1 text-slate-500">
+                          <span className="text-emerald-600">POC:</span>
+                          <span className="text-slate-700 truncate max-w-[120px]">{event.pocName}</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-slate-500">
+                          <span className="text-amber-600">Head:</span>
+                          <span className="text-slate-700 truncate max-w-[120px]">{event.eventHeadName}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-6 mt-3 sm:mt-0 w-full sm:w-auto justify-between sm:justify-end bg-slate-50 sm:bg-transparent p-3 sm:p-0 rounded-lg sm:rounded-none">
+                      <div className="flex items-center gap-2">
+                        <div className="bg-white sm:bg-slate-100 p-1.5 rounded-full border border-slate-100 sm:border-slate-200">
+                          <Users className="h-4 w-4 text-slate-500" />
+                        </div>
+                        <div className="flex flex-col items-start leading-tight">
+                          <span className="text-[10px] sm:text-xs text-slate-400 font-medium uppercase tracking-wider">Students</span>
+                          <span className="text-sm font-bold text-slate-700">{event._count.students}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="w-px h-8 bg-slate-200 hidden sm:block"></div>
+                      
+                      <div className="flex items-center gap-2">
+                        <div className="bg-white sm:bg-slate-100 p-1.5 rounded-full border border-slate-100 sm:border-slate-200">
+                          <Users className="h-4 w-4 text-emerald-500" />
+                        </div>
+                        <div className="flex flex-col items-start leading-tight">
+                          <span className="text-[10px] sm:text-xs text-slate-400 font-medium uppercase tracking-wider">Staff</span>
+                          <span className="text-sm font-bold text-slate-700">{event._count.eventStaff}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-4">
+                    {dynamicStatus === "UPCOMING" && (
+                      <EventManagementActions 
+                        eventId={event.id} 
+                        currentDate={event.eventDate} 
+                        status={event.status} 
+                      />
+                    )}
+                    <div className="hidden sm:flex items-center justify-center p-2">
+                      <div className="bg-slate-50 p-2 rounded-full group-hover:bg-emerald-50 group-hover:text-emerald-600 text-slate-300 transition-colors">
+                        <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              </Link>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
