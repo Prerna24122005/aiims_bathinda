@@ -9,6 +9,7 @@ type StaffType = {
   id: string;
   fullName: string;
   email: string;
+  department?: string | null;
 };
 
 export function CreateEventButton({

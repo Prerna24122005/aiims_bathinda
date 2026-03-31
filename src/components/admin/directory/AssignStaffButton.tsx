@@ -9,6 +9,7 @@ type StaffMember = {
   id: string;
   fullName: string;
   email: string;
+  department?: string | null;
 };
 
 export function AssignStaffButton({ 
@@ -89,9 +90,16 @@ export function AssignStaffButton({
                       checked={selectedStaffIds.has(staff.id)}
                       onChange={() => toggleStaffSelection(staff.id)}
                     />
-                    <div>
-                      <p className="font-medium text-sm text-slate-900">{staff.fullName}</p>
-                      <p className="text-xs text-slate-500">{staff.email}</p>
+                    <div className="flex-1 flex justify-between items-center">
+                      <div>
+                        <p className="font-medium text-sm text-slate-900">{staff.fullName}</p>
+                        <p className="text-xs text-slate-500">{staff.email}</p>
+                      </div>
+                      {staff.department && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold tracking-wider bg-slate-100 text-slate-600 uppercase border border-slate-200">
+                          {staff.department.replace("_", " ")}
+                        </span>
+                      )}
                     </div>
                   </label>
                 ))

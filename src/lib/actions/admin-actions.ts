@@ -32,7 +32,7 @@ export async function getMedicalStaff() {
       role: "MEDICAL_STAFF",
       isActive: true
     },
-    select: { id: true, fullName: true, email: true },
+    select: { id: true, fullName: true, email: true, department: true },
     orderBy: { fullName: "asc" }
   });
 }
@@ -241,7 +241,8 @@ export async function createEvent(
 export async function addMedicalStaff(
   fullName: string,
   email: string,
-  rawPassword: string
+  rawPassword: string,
+  department: string | null = null
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -263,7 +264,8 @@ export async function addMedicalStaff(
         email,
         passwordHash,
         fullName,
-        role: "MEDICAL_STAFF"
+        role: "MEDICAL_STAFF",
+        department: department as any
       }
     });
 

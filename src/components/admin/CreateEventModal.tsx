@@ -9,6 +9,7 @@ type StaffType = {
   id: string;
   fullName: string;
   email: string;
+  department?: string | null;
 };
 
 export function CreateEventModal({
@@ -107,9 +108,16 @@ export function CreateEventModal({
                     checked={selectedStaff.includes(staff.id)}
                     onChange={() => toggleStaffSelection(staff.id)}
                   />
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium text-gray-900">{staff.fullName}</span>
-                    <span className="text-xs text-gray-500">{staff.email}</span>
+                  <div className="flex-1 flex justify-between items-center">
+                    <div>
+                      <p className="font-medium text-sm text-slate-900">{staff.fullName}</p>
+                      <p className="text-xs text-slate-500">{staff.email}</p>
+                    </div>
+                    {staff.department && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold tracking-wider bg-slate-100 text-slate-600 uppercase border border-slate-200">
+                        {staff.department.replace("_", " ")}
+                      </span>
+                    )}
                   </div>
                 </label>
               ))}

@@ -19,6 +19,15 @@ enum Role {
   SCHOOL_POC
 }
 
+enum Department {
+  COMMUNITY_MEDICINE
+  DENTAL
+  OPHTHALMOLOGY
+  DERMATOLOGY
+  GENERAL
+  ENT
+}
+
 enum RequestStatus {
   PENDING
   ACCEPTED
@@ -51,6 +60,7 @@ model User {
   passwordHash  String
   fullName      String
   role          Role               @default(MEDICAL_STAFF)
+  department    Department?
   isActive      Boolean            @default(true)
   createdAt     DateTime           @default(now())
   createdEvents Event[]            @relation("EventCreator")

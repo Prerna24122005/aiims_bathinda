@@ -13,6 +13,7 @@ type StaffType = {
   fullName: string;
   email: string;
   role: string;
+  department?: string | null;
 };
 
 export function StaffDirectoryClient({
@@ -70,25 +71,37 @@ export function StaffDirectoryClient({
         </Card>
       ) : (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="grid grid-cols-[minmax(250px,1fr)_minmax(200px,1fr)_160px] items-center px-6 py-4 bg-slate-50 border-b border-slate-100 text-xs font-semibold uppercase tracking-wider text-slate-500">
+          <div className="grid grid-cols-[minmax(250px,1fr)_minmax(200px,1fr)_minmax(150px,1fr)_160px] items-center px-6 py-4 bg-slate-50 border-b border-slate-100 text-xs font-semibold uppercase tracking-wider text-slate-500">
             <div>Staff Member</div>
             <div>Email Address</div>
+            <div>Department</div>
             <div className="text-center">Actions</div>
           </div>
           <div className="divide-y divide-slate-100">
             {filteredStaff.map(staff => (
-              <div key={staff.id} className="grid grid-cols-[minmax(250px,1fr)_minmax(200px,1fr)_160px] items-center px-6 py-4 hover:bg-slate-50/80 transition-colors group">
+              <div key={staff.id} className="grid grid-cols-[minmax(250px,1fr)_minmax(200px,1fr)_minmax(150px,1fr)_160px] items-center px-6 py-4 hover:bg-slate-50/80 transition-colors group">
                 <div className="flex items-center gap-4">
                   <div className="h-10 w-10 rounded-full bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center shadow-sm border border-emerald-50 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
                     {staff.fullName.charAt(0)}
                   </div>
-                  <span className="font-bold text-slate-900 group-hover:text-emerald-600 transition-colors">
-                    {staff.fullName}
-                  </span>
+                  <div>
+                    <span className="font-bold text-slate-900 group-hover:text-emerald-600 transition-colors block">
+                      {staff.fullName}
+                    </span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2 text-slate-600">
                   <Mail className="h-4 w-4 text-slate-400" />
                   <span className="truncate">{staff.email}</span>
+                </div>
+                <div className="flex items-center">
+                  {staff.department ? (
+                    <span className="text-sm font-medium text-slate-700 capitalize">
+                      {staff.department.toLowerCase().replace("_", " ")}
+                    </span>
+                  ) : (
+                    <span className="text-sm text-slate-400 italic">Unassigned</span>
+                  )}
                 </div>
                 <div className="flex items-center justify-center">
                   <DeleteUserButton userId={staff.id} userName={staff.fullName} />

@@ -19,8 +19,9 @@ export function AddUserButton() {
     const fullName = formData.get("fullName") as string;
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
+    const department = formData.get("department") as string | null;
 
-    const res = await addMedicalStaff(fullName, email, password);
+    const res = await addMedicalStaff(fullName, email, password, department);
 
     if (res.success) {
       setIsOpen(false);
@@ -59,6 +60,18 @@ export function AddUserButton() {
                 <label className="text-sm font-medium text-slate-700">Temporary Password</label>
                 <input required name="password" type="password" className="w-full p-2 border rounded-md" minLength={6} />
                 <p className="text-xs text-slate-400 mt-1">Minimum 6 characters.</p>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-slate-700">Department (Optional)</label>
+                <select name="department" className="w-full p-2 border rounded-md bg-white" required>
+                  <option value="COMMUNITY_MEDICINE">Community Medicine</option>
+                  <option value="DENTAL">Dental</option>
+                  <option value="OPHTHALMOLOGY">Ophthalmology</option>
+                  <option value="DERMATOLOGY">Dermatology</option>
+                  <option value="ENT">ENT</option>
+                  <option value="GENERAL">General</option>
+                </select>
               </div>
 
               <div className="flex justify-end gap-3 pt-4 border-t mt-4">

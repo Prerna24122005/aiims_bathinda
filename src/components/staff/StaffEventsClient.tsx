@@ -63,12 +63,12 @@ export function StaffEventsClient({ events }: { events: AssignedEventType[] }) {
         <div className="flex flex-col gap-3">
           {displayedEvents.map(event => (
             <Link href={`/staff/workspace/${event.id}`} key={event.id} className="group">
-              <Card className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-5 border border-slate-200 hover:border-emerald-300 hover:shadow-md transition-all duration-200 bg-white rounded-xl overflow-hidden relative">
-                <div className={`absolute left-0 top-0 bottom-0 w-1 ${event.status === "ACTIVE" ? 'bg-emerald-500' : event.status === "PAST" ? 'bg-slate-400' : 'bg-emerald-500'}`} />
+              <Card className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-2 sm:p-2 border border-slate-200 hover:border-emerald-300 hover:shadow-md transition-all duration-200 bg-white rounded-xl overflow-hidden relative">
+                <div className={`absolute left-0 top-0 bottom-0 w-1 ${event.status === "ACTIVE" ? 'bg-emerald-500' : event.status === "PAST" ? 'bg-slate-300' : 'bg-emerald-500'}`} />
 
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 flex-1 pl-3 w-full">
                   <div className="min-w-[140px]">
-                    <Badge className={`px-2.5 py-1 text-xs font-semibold rounded-full mb-1 border ${event.status === "ACTIVE"
+                    <Badge className={`px-2 py-0 text-[10px] font-semibold rounded-full border ${event.status === "ACTIVE"
                       ? 'bg-emerald-100 text-emerald-800 border-emerald-200 hover:bg-emerald-200'
                       : event.status === "PAST"
                         ? 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'
@@ -76,37 +76,32 @@ export function StaffEventsClient({ events }: { events: AssignedEventType[] }) {
                       }`}>
                       {event.status}
                     </Badge>
-                    <p className="text-sm font-medium text-slate-500 flex items-center gap-1.5 mt-1.5">
-                      <CalendarDays className="h-3.5 w-3.5 text-slate-400" />
+                    <p className="text-xs font-semibold text-slate-500 flex items-center gap-1.5 mt-0.5">
                       {event.date.toLocaleDateString("en-US", { month: 'short', day: 'numeric', year: 'numeric' })}
                     </p>
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-xl font-black text-slate-900 group-hover:text-emerald-700 transition-colors truncate">
+                    <h3 className="text-lg font-bold text-slate-900 group-hover:text-emerald-700 transition-colors truncate">
                       {event.schoolName}
                     </h3>
-                    <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 font-bold uppercase tracking-tighter text-[10px]">
-                        <div className="flex items-center gap-1 text-slate-500">
-                          <span className="text-emerald-600">POC:</span>
-                          <span className="text-slate-700 truncate max-w-[120px]">{event.pocName}</span>
-                        </div>
-                        <div className="flex items-center gap-1 text-slate-500">
-                          <span className="text-amber-600">Head:</span>
-                          <span className="text-slate-700 truncate max-w-[120px]">{event.eventHeadName}</span>
-                        </div>
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 mt-0.5 font-medium uppercase tracking-tighter text-[11px]">
+                      <div className="flex items-center gap-1 text-slate-500">
+                        <span className="text-emerald-600">POC:</span>
+                        <span className="text-slate-700 truncate max-w-[120px]">{event.pocName}</span>
                       </div>
-                    <p className="text-sm font-medium text-slate-500 flex items-center gap-1.5 mt-1.5">
-                      <MapPin className="h-3.5 w-3.5 text-slate-400" />
-                      {event.location}
-                    </p>
+                      <div className="flex items-center gap-1 text-slate-500">
+                        <span className="text-amber-600">Head:</span>
+                        <span className="text-slate-700 truncate max-w-[120px]">{event.eventHeadName}</span>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="flex items-center mt-3 sm:mt-0 w-full sm:w-auto mt-2 gap-2">
+                  <div className="flex items-center gap-6 mt-3 sm:mt-0 w-full sm:w-auto justify-between sm:justify-end bg-slate-50 sm:bg-transparent p-3 sm:p-0 rounded-lg sm:rounded-none pr-4">
                     {event.referredCount > 0 && (
                       <div onClick={e => e.stopPropagation()}>
                         <Dialog>
-                          <DialogTrigger onClick={e => e.preventDefault()} className="cursor-pointer text-xs font-bold text-red-700 bg-red-50 px-2.5 py-1.5 rounded-full border border-red-200 hover:bg-red-100 transition-colors animate-pulse">
+                          <DialogTrigger onClick={e => e.preventDefault()} className="cursor-pointer text-[10px] sm:text-xs font-bold text-red-700 bg-red-50 px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-full border border-red-200 hover:bg-red-100 transition-colors animate-pulse">
                             {event.referredCount} Referred
                           </DialogTrigger>
                           <DialogContent className="sm:max-w-md max-h-[80vh] flex flex-col pt-6 pb-2 px-1 rounded-xl">
@@ -136,9 +131,15 @@ export function StaffEventsClient({ events }: { events: AssignedEventType[] }) {
                         </Dialog>
                       </div>
                     )}
-                    <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200">
-                      {event.studentCount} Students
-                    </span>
+
+                    <div className="w-px h-4 sm:h-6 bg-slate-200 hidden sm:block"></div>
+
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] sm:text-xs text-slate-400 font-medium uppercase tracking-wider">Students:</span>
+                        <span className="text-sm font-bold text-slate-700">{event.studentCount}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
