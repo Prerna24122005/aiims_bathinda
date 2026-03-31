@@ -86,7 +86,7 @@ export function EventManagementActions({
 
       {/* Reschedule Dialog */}
       <Dialog open={isRescheduleOpen} onOpenChange={setIsRescheduleOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px]" onClick={(e) => e.stopPropagation()}>
           <DialogHeader>
             <DialogTitle>Reschedule Event</DialogTitle>
             <DialogDescription>
@@ -120,7 +120,7 @@ export function EventManagementActions({
 
       {/* Cancel Confirmation Dialog */}
       <Dialog open={isCancelOpen} onOpenChange={setIsCancelOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px]" onClick={(e) => e.stopPropagation()}>
           <DialogHeader>
             <DialogTitle className="text-red-600 font-bold">Cancel Health Camp?</DialogTitle>
             <DialogDescription>

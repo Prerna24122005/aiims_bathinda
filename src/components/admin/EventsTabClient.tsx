@@ -19,7 +19,7 @@ type EventType = {
   _count: { eventStaff: number; students: number; }
 };
 
-export function EventsTabClient({ events }: { events: EventType[] }) {
+export function EventsTabClient({ events, actionButton }: { events: EventType[], actionButton?: React.ReactNode }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"ALL" | "UPCOMING" | "ACTIVE (TODAY)" | "PAST">("ALL");
 
@@ -80,7 +80,7 @@ export function EventsTabClient({ events }: { events: EventType[] }) {
   return (
     <div className="space-y-6">
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-100">
-        <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">Platform Events</h2>
+        <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">All Events</h2>
 
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
           <div className="relative w-full sm:w-auto">
@@ -110,6 +110,15 @@ export function EventsTabClient({ events }: { events: EventType[] }) {
               </Button>
             ))}
           </div>
+
+          {actionButton && (
+            <>
+              <div className="w-px h-8 bg-slate-200 hidden sm:block mx-1"></div>
+              <div className="w-full sm:w-auto flex justify-start lg:justify-end shrink-0">
+                {actionButton}
+              </div>
+            </>
+          )}
 
         </div>
       </div>

@@ -62,7 +62,7 @@ export default async function AdminDashboard() {
         <aside className="w-full md:w-64 bg-white border-r flex-shrink-0">
           <div className="py-4 md:py-6 h-full flex flex-col pr-4 md:pr-0">
             <div className="px-6 mb-4 hidden md:block">
-              <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Menu</h2>
+              <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Admin Portal</h2>
             </div>
             <TabsList className="flex flex-col h-auto w-full bg-transparent p-0 justify-start items-stretch shrink-0 space-y-1">
               <TabsTrigger value="requests" className="w-full justify-start px-6 py-2.5 text-sm md:text-base font-medium data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-900 data-[state=active]:font-semibold flex gap-3 rounded-full md:rounded-l-none md:rounded-r-full transition-all text-slate-600 hover:bg-slate-100 hover:text-slate-900 border-0">
@@ -86,16 +86,6 @@ export default async function AdminDashboard() {
         {/* Main Content Area */}
         <main className="flex-1 w-full overflow-y-auto p-4 md:p-8 bg-slate-50">
           <div className="max-w-6xl mx-auto">
-            <div className="flex justify-between items-start md:items-center mb-8 flex-col md:flex-row gap-4">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight text-slate-900">Admin Portal</h1>
-                <p className="text-slate-500 mt-1">Manage health camps, users, and incoming requests.</p>
-              </div>
-              <CreateEventButton
-                medicalStaff={medicalStaff}
-              />
-            </div>
-
             <div className="w-full pb-12">
               <TabsContent value="requests" className="mt-0 space-y-4 outline-none">
                 <RequestsTabClient
@@ -105,7 +95,10 @@ export default async function AdminDashboard() {
               </TabsContent>
 
               <TabsContent value="events" className="mt-0 outline-none">
-                <EventsTabClient events={enrichedEvents as any} />
+                <EventsTabClient
+                  events={enrichedEvents as any}
+                  actionButton={<CreateEventButton medicalStaff={medicalStaff} />}
+                />
               </TabsContent>
 
               <TabsContent value="users" className="mt-0 outline-none">
