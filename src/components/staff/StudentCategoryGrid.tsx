@@ -57,9 +57,30 @@ export function StudentCategoryGrid({
 }) {
   // Removed extra state
 
-  // Split categories into assigned and others
-  const assignedCategories = categoriesStatus.filter(cat => assignedCategoryIds.includes(cat.id));
-  const otherCategories = categoriesStatus.filter(cat => !assignedCategoryIds.includes(cat.id));
+  // Determine severity for sorting (1 is highest priority)
+  const getSeverity = (cat: CategoryStatus) => {
+    if (cat.data?.status_nor === 'R') return 1;
+    if (cat.data?.status_nor === 'O') return 2;
+    
+    // Fallback for older data without status_nor explicit label
+    if (cat.data) {
+      const hasIssue = Object.entries(cat.data).some(([k, v]) => !k.startsWith('_') && k !== 'status_nor' && isMedicalIssue(k, v));
+      if (hasIssue) return 1;
+    }
+
+    if (cat.data?.status_nor === 'N' || cat.status === 'COMPLETED') return 3;
+    if (cat.status === 'IN_PROGRESS') return 4;
+    return 5; // PENDING
+  };
+
+  // Split categories into assigned and others, sorted by severity
+  const assignedCategories = categoriesStatus
+    .filter(cat => assignedCategoryIds.includes(cat.id))
+    .sort((a, b) => getSeverity(a) - getSeverity(b));
+    
+  const otherCategories = categoriesStatus
+    .filter(cat => !assignedCategoryIds.includes(cat.id))
+    .sort((a, b) => getSeverity(a) - getSeverity(b));
 
   const renderCategoryCard = (cat: CategoryStatus, isAssigned: boolean) => {
     return (

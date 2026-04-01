@@ -100,6 +100,12 @@ export default async function StaffDashboard() {
       eventHeadName: eventHead,
       isHead,
     };
+  }).sort((a, b) => {
+    const statusOrder: Record<string, number> = { "ACTIVE": 1, "UPCOMING": 2, "PAST": 3 };
+    if (statusOrder[a.status] !== statusOrder[b.status]) {
+      return statusOrder[a.status] - statusOrder[b.status];
+    }
+    return a.date.getTime() - b.date.getTime();
   });
   
   return (
