@@ -110,7 +110,7 @@ export default async function StaffDashboard() {
         <StaffDashboardHeader />
 
         <section>
-          <StaffEventsClient events={assignedEvents} />
+          <StaffEventsClient events={assignedEvents} userRole={session?.user?.role} />
         </section>
       </main>
     </div>

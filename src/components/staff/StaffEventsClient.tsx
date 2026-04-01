@@ -22,7 +22,13 @@ type AssignedEventType = {
   isHead: boolean;
 };
 
-export function StaffEventsClient({ events }: { events: AssignedEventType[] }) {
+export function StaffEventsClient({ 
+  events, 
+  userRole 
+}: { 
+  events: AssignedEventType[], 
+  userRole?: string 
+}) {
   const [showHeadOnly, setShowHeadOnly] = useState(false);
 
   const displayedEvents = showHeadOnly ? events.filter(e => e.isHead) : events;
@@ -33,20 +39,22 @@ export function StaffEventsClient({ events }: { events: AssignedEventType[] }) {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-xl font-semibold text-gray-800">Assigned Events</h2>
 
-        <div className="flex bg-slate-100 p-1 rounded-lg overflow-x-auto w-full sm:w-auto mt-2 sm:mt-0">
-          <button
-            onClick={() => setShowHeadOnly(false)}
-            className={`px-4 py-1.5 text-sm font-medium rounded-md whitespace-nowrap transition-all flex-1 sm:flex-none ${!showHeadOnly ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
-          >
-            All Events
-          </button>
-          <button
-            onClick={() => setShowHeadOnly(true)}
-            className={`px-4 py-1.5 text-sm font-medium rounded-md whitespace-nowrap transition-all flex-1 sm:flex-none ${showHeadOnly ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
-          >
-            Assigned as Head
-          </button>
-        </div>
+        {userRole !== "SCHOOL_POC" && (
+          <div className="flex bg-slate-100 p-1 rounded-lg overflow-x-auto w-full sm:w-auto mt-2 sm:mt-0">
+            <button
+              onClick={() => setShowHeadOnly(false)}
+              className={`px-4 py-1.5 text-sm font-medium rounded-md whitespace-nowrap transition-all flex-1 sm:flex-none ${!showHeadOnly ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
+            >
+              All Events
+            </button>
+            <button
+              onClick={() => setShowHeadOnly(true)}
+              className={`px-4 py-1.5 text-sm font-medium rounded-md whitespace-nowrap transition-all flex-1 sm:flex-none ${showHeadOnly ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
+            >
+              Assigned as Head
+            </button>
+          </div>
+        )}
       </div>
 
       {displayedEvents.length === 0 ? (
