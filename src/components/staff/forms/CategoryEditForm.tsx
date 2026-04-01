@@ -495,8 +495,7 @@ export function CategoryEditFormClient({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col pb-24">
-      <Navbar role={userRole || "MEDICAL_STAFF"} userName={userName || "Staff"} />
+    <div className="flex flex-col pb-24">
 
       {/* Category Editor Header */}
       <div className="bg-white border-b shrink-0 z-20 shadow-sm relative">
@@ -512,15 +511,33 @@ export function CategoryEditFormClient({
                 <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-1">
                   {student?.firstName} {student?.lastName}
                 </h1>
-                <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 uppercase tracking-widest">
-                  {customCategoryBlock ? customCategoryBlock.title : (
-                    category === "ent" ? "ENT Examination" :
-                      category === "communityMed" ? "Community Medicine" :
-                        category === "dental" ? "Dental Examination" :
-                          category === "optical" ? "Optical Examination" :
-                            category === "skin" ? "Skin Examination" :
-                              category.replace(/([A-Z])/g, ' $1').trim()
-                  )}
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 uppercase tracking-widest shrink-0">
+                    {customCategoryBlock ? customCategoryBlock.title : (
+                      category === "ent" ? "ENT Examination" :
+                        category === "communityMed" ? "Community Medicine" :
+                          category === "dental" ? "Dental Examination" :
+                            category === "optical" ? "Optical Examination" :
+                              category === "skin" ? "Skin Examination" :
+                                category.replace(/([A-Z])/g, ' $1').trim()
+                    )}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-bold text-slate-500 uppercase tracking-tight">
+                    <span className="flex items-center gap-1"><span className="opacity-40">Class:</span> {student?.classSec}</span>
+                    <span className="flex items-center gap-1"><span className="opacity-40">Age:</span> {student?.age}</span>
+                    {(() => {
+                      const recordData = (student?.medicalRecord?.data as Record<string, any>) || {};
+                      const commMedData = recordData.communityMed || {};
+                      const height = parseFloat(commMedData.height);
+                      const weight = parseFloat(commMedData.weight);
+                      const bmi = (height && weight) ? (weight / Math.pow(height / 100, 2)).toFixed(1) : "NA";
+                      return (
+                        <span className="flex items-center gap-1 text-emerald-600">
+                          <span className="opacity-60 text-slate-500 font-bold">BMI:</span> {bmi}
+                        </span>
+                      );
+                    })()}
+                  </div>
                 </div>
               </div>
             </div>
@@ -534,7 +551,11 @@ export function CategoryEditFormClient({
             <AlertCircle className="h-4 w-4 text-amber-600" />
             <AlertTitle className="text-amber-800 font-bold text-sm">Previously Filled by Another Doctor</AlertTitle>
             <AlertDescription className="text-amber-800/80 text-xs">
-              This section contains data recorded by <strong>{initialData._managedBy}</strong>. Please review carefully.
+              This section contains data recorded by <strong>{
+                /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(initialData._managedBy)
+                  ? "another staff member"
+                  : initialData._managedBy
+              }</strong>. Please review carefully.
             </AlertDescription>
           </Alert>
         )}

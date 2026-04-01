@@ -22,8 +22,8 @@ export default async function CategoryEditForm({ params }: { params: Promise<{ e
   if (!validCategories.includes(category)) return notFound();
 
   // Fetch student and their medical record
-  const student = await prisma.student.findUnique({
-    where: { id: studentId, eventId },
+  const student = await prisma.student.findFirst({
+    where: { id: studentId },
     include: {
       medicalRecord: true
     }

@@ -1,8 +1,6 @@
-import { Navbar } from "@/components/layout/Navbar";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Clock, Ear, Activity, Smile, Eye, Hand, ArrowLeft, FileText, AlertCircle } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { prisma } from "@/lib/db/prisma";
 import { notFound } from "next/navigation";
@@ -32,8 +30,8 @@ export default async function StudentRecordMasterView(props: {
   const session = await getServerSession(authOptions);
 
   // Fetch full student and medical record from DB
-  const student = await prisma.student.findUnique({
-    where: { id: studentId, eventId },
+  const student = await prisma.student.findFirst({
+    where: { id: studentId },
     include: {
       medicalRecord: true,
     }
@@ -65,6 +63,16 @@ export default async function StudentRecordMasterView(props: {
 
   // Determine completions from JSONB data and Config
   const recordData = (student.medicalRecord?.data as Record<string, any>) || {};
+
+  // Extract BMI data
+  const commMedData = recordData.communityMed || {};
+  const height = parseFloat(commMedData.height);
+  const weight = parseFloat(commMedData.weight);
+  let bmi = null;
+  if (height && weight) {
+    const heightInMeters = height / 100;
+    bmi = (weight / (heightInMeters * heightInMeters)).toFixed(1);
+  }
 
   let completedCount = 0;
 
@@ -142,9 +150,8 @@ export default async function StudentRecordMasterView(props: {
   const globalStatus = student.medicalRecord?.status || "PENDING";
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="flex flex-col">
       <RealTimeRefresher />
-      <Navbar role={session?.user?.role || "MEDICAL_STAFF"} userName={session?.user?.name || "Dr. Staff"} />
 
       {/* Student Sticky Header */}
       <div className="bg-white border-b sticky top-0 z-10 shadow-sm">
@@ -157,9 +164,10 @@ export default async function StudentRecordMasterView(props: {
                     <ArrowLeft className="h-4 w-4" />
                   </Button>
                 </Link>
+                <span className="text-[10px] uppercase font-black tracking-widest text-emerald-600/60">Patient View</span>
               </div>
               <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-extrabold text-slate-900 leading-tight">{student.firstName} {student.lastName}</h1>
+                <h1 className="text-3xl font-extrabold text-slate-900 leading-tight tracking-tight">{student.firstName} {student.lastName}</h1>
                 <Badge variant="outline" className={
                   globalStatus === "COMPLETED" ? "bg-green-50 text-green-700 border-green-200" :
                     globalStatus === "IN_PROGRESS" ? "bg-amber-50 text-amber-700 border-amber-200" :
@@ -168,20 +176,22 @@ export default async function StudentRecordMasterView(props: {
                   {globalStatus.replace('_', ' ')}
                 </Badge>
               </div>
-              <p className="text-base font-semibold text-slate-600 mt-2 flex gap-4">
-                <span>Class: {student.classSec}</span>
-                <span>Age: {student.age}</span>
-                <span>Gender: {student.gender}</span>
+              <p className="text-sm font-bold text-slate-500 mt-2 flex flex-wrap gap-4 uppercase tracking-tight">
+                <span className="flex items-center gap-1.5"><span className="opacity-40">Class:</span> {student.classSec}</span>
+                <span className="flex items-center gap-1.5"><span className="opacity-40">Age:</span> {student.age}</span>
+                <span className="flex items-center gap-1.5 text-emerald-600">
+                  <span className="opacity-60 text-slate-500">BMI:</span> {bmi || 'NA'}
+                </span>
               </p>
             </div>
 
             <div className="w-full md:w-1/3">
-              <div className="flex justify-between text-xs font-semibold text-slate-500 mb-1">
+              <div className="flex justify-between text-[11px] font-black text-slate-500 mb-1.5 uppercase tracking-widest">
                 <span>Completion Status</span>
                 <span>{completionPercentage}%</span>
               </div>
-              <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
-                <div className={`h-2.5 rounded-full ${completionPercentage === 100 ? 'bg-green-600' : 'bg-emerald-600'}`} style={{ width: `${completionPercentage}%` }}></div>
+              <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden shadow-inner">
+                <div className={`h-2.5 rounded-full transition-all duration-700 ease-out ${completionPercentage === 100 ? 'bg-green-500' : 'bg-emerald-500'}`} style={{ width: `${completionPercentage}%` }}></div>
               </div>
             </div>
           </div>
@@ -189,10 +199,6 @@ export default async function StudentRecordMasterView(props: {
       </div>
 
       <main className="flex-1 w-full max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
-        <div className="flex flex-col mb-6 gap-2">
-          <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Medical Record Categories</h2>
-          <p className="text-slate-600 text-base font-medium">Select a category below to edit the student's medical information. Each section saves independently.</p>
-        </div>
 
         <StudentCategoryGrid
           categoriesStatus={categoriesStatus}

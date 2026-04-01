@@ -1,10 +1,12 @@
-import { Navbar } from "@/components/layout/Navbar";
 import { prisma } from "@/lib/db/prisma";
 import { notFound, redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ReferredListClient } from "@/components/staff/ReferredListClient";
 
 export default async function ReferredStudentsPage({ params }: { params: Promise<{ eventId: string }> }) {
     const { eventId } = await params;
@@ -63,51 +65,34 @@ export default async function ReferredStudentsPage({ params }: { params: Promise
     });
 
     return (
-        <div className="min-h-screen bg-slate-50 flex flex-col">
-            <Navbar role={session?.user?.role || "MEDICAL_STAFF"} userName={session?.user?.name || "Dr. Staff"} />
-
-            <main className="flex-1 w-full max-w-4xl mx-auto p-4 md:p-8">
-                <div className="mb-6">
-                    <Link href="/staff/dashboard" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-emerald-600 transition-colors mb-4">
-                        <ArrowLeft className="h-4 w-4 mr-1" /> Back to Dashboard
-                    </Link>
-                    <h1 className="text-2xl font-bold text-slate-900">Referred Students</h1>
-                    <p className="text-slate-500 mt-1">{event.schoolDetails} - {new Date(event.eventDate).toLocaleDateString()}</p>
-                </div>
-
-                <div className="bg-white rounded-xl shadow-sm border p-4 md:p-6">
-                    <div className="flex items-center gap-2 mb-6 pb-4 border-b">
-                        <h2 className="text-lg font-semibold text-red-700">Total Referred:</h2>
-                        <span className="bg-red-100 text-red-700 text-sm font-bold px-2.5 py-0.5 rounded-full">{referredStudents.length}</span>
+        <div className="flex flex-col">
+            <main className="flex-1 w-full max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+                {/* Sticky Header Section */}
+                <div className="sticky top-0 bg-slate-50/95 backdrop-blur-sm pt-2 pb-6 mb-4 z-20 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 shadow-[0_1px_0_0_rgba(0,0,0,0.05)]">
+                    <div className="flex items-center gap-3 mb-2">
+                        <Link href={`/staff/workspace/${eventId}`}>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50 text-emerald-600 transition-all shadow-sm">
+                                <ArrowLeft className="h-4 w-4" />
+                            </Button>
+                        </Link>
+                        <span className="text-[10px] uppercase font-black tracking-widest text-emerald-600/60">Event Workspace</span>
                     </div>
-
-                    {referredStudents.length === 0 ? (
-                        <div className="text-center py-12 text-slate-500">
-                            No students have been referred yet.
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <div className="flex items-center gap-4">
+                                <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Referred Students</h1>
+                                <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 uppercase font-bold px-3">
+                                    {referredStudents.length} Flagged
+                                </Badge>
+                            </div>
+                            <p className="text-sm font-bold text-slate-500 mt-2 uppercase tracking-tight">
+                                {event.schoolDetails} — {new Date(event.eventDate).toLocaleDateString(undefined, { dateStyle: 'long' })}
+                            </p>
                         </div>
-                    ) : (
-                        <div className="space-y-3">
-                            {referredStudents.map(stud => (
-                                <Link href={`/staff/workspace/${event.id}/student/${stud.id}?from=referred`} key={stud.id} className="block">
-                                    <div className="bg-red-50 p-4 rounded-xl border border-red-100 hover:bg-red-100 hover:border-red-200 transition-all flex justify-between items-center group shadow-sm">
-                                        <div>
-                                            <p className="font-bold text-slate-900 text-lg">{stud.name}</p>
-                                            <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mb-2">{stud.classSec}</p>
-                                            <div className="flex flex-wrap gap-1.5">
-                                                {stud.depts.map((d: string) => (
-                                                    <span key={d} className="text-[10px] font-bold bg-red-200 text-red-800 px-2 py-0.5 rounded-md uppercase tracking-wider">{d}</span>
-                                                ))}
-                                            </div>
-                                        </div>
-                                        <div className="bg-white p-2 rounded-full shadow-sm group-hover:shadow group-hover:scale-110 transition-all">
-                                            <ArrowRight className="h-5 w-5 text-red-500" />
-                                        </div>
-                                    </div>
-                                </Link>
-                            ))}
-                        </div>
-                    )}
+                    </div>
                 </div>
+
+                <ReferredListClient students={referredStudents} eventId={eventId} />
             </main>
         </div>
     );

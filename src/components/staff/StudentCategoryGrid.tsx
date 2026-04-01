@@ -102,11 +102,6 @@ export function StudentCategoryGrid({
                   </Badge>
                 )}
               </div>
-              {isAssigned && (
-                <Badge className="bg-emerald-600 text-white border-emerald-700 text-[10px] py-0 px-1.5 shadow-sm">
-                  Assigned
-                </Badge>
-              )}
             </div>
           </div>
 

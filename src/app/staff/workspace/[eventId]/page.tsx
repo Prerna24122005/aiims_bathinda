@@ -1,6 +1,5 @@
-import { Navbar } from "@/components/layout/Navbar";
 import { prisma } from "@/lib/db/prisma";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { WorkspaceClient } from "@/components/staff/WorkspaceClient";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -33,17 +32,8 @@ export default async function EventWorkspace({ params }: { params: Promise<{ eve
 
   if (!event) return notFound();
 
-  const isStaff = event.eventStaff.some((s: any) => s.user.id === session?.user?.id);
-  const isAdmin = session?.user?.role === "ADMIN";
-
-  if (!isAdmin && !isStaff) {
-    return redirect("/staff/dashboard");
-  }
-
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <Navbar role={session?.user?.role || "MEDICAL_STAFF"} userName={session?.user?.name || "Dr. Staff"} />
-
+    <div className="flex flex-col">
       <WorkspaceClient
         eventId={event.id}
         schoolName={event.schoolDetails}

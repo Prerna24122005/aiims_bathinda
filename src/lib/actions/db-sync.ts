@@ -124,7 +124,7 @@ export async function saveMedicalCategory(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ...((existingData[categoryName] as Record<string, any>) || {}),
         ...categoryData,
-        _managedBy: userId,
+        _managedBy: session.user.name || session.user.email || userId,
         _lastUpdated: new Date().toISOString()
       },
     };

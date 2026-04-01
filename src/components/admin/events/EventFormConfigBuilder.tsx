@@ -241,7 +241,6 @@ export function EventFormConfigBuilder({
           <h2 className="text-xl font-bold tracking-tight">Form Configuration Builder</h2>
           <p className="text-muted-foreground text-sm mt-1">
             Check the fields below that must be provided by the Medical Staff.
-            You can also add entirely custom sections and define your own fields dynamically.
           </p>
         </div>
         <div className="flex gap-2">
