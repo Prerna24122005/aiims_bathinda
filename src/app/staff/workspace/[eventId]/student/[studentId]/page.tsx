@@ -61,7 +61,7 @@ export default async function StudentRecordMasterView(props: {
   } else if (evDate < today) {
     dynamicStatus = "PAST";
   }
-  const isPOC = event?.pocEmail?.toLowerCase() === session?.user?.email?.toLowerCase();
+
 
   // Determine completions from JSONB data and Config
   const recordData = (student.medicalRecord?.data as Record<string, any>) || {};
@@ -111,13 +111,8 @@ export default async function StudentRecordMasterView(props: {
       }
     }
 
-    // POC / Staff read-only logic
+    // Staff read-only logic
     let catIsReadOnly = dynamicStatus === "PAST";
-    if (isPOC) {
-      if ((cat.id !== 'communityMed' && cat.id !== 'demographics') || dynamicStatus !== 'UPCOMING') {
-        catIsReadOnly = true;
-      }
-    }
 
     return {
       id: cat.id,
@@ -139,11 +134,9 @@ export default async function StudentRecordMasterView(props: {
   // Calculate assigned categories
   const assignedCategoryIds = isAdmin || isEventHead
     ? ALL_CATEGORY_DEFINITIONS.map(c => c.id) // Admins and Event Heads see all
-    : isPOC
-      ? ["demographics", "communityMed"] // POC sees these
-      : ALL_CATEGORY_DEFINITIONS
-        .filter(cat => (assignmentsByTag[cat.id] || []).includes(session?.user?.id || ""))
-        .map(cat => cat.id);
+    : ALL_CATEGORY_DEFINITIONS
+      .filter(cat => (assignmentsByTag[cat.id] || []).includes(session?.user?.id || ""))
+      .map(cat => cat.id);
 
   const completionPercentage = Math.round((completedCount / ALL_CATEGORY_DEFINITIONS.length) * 100);
   const globalStatus = student.medicalRecord?.status || "PENDING";
@@ -199,27 +192,6 @@ export default async function StudentRecordMasterView(props: {
         <div className="flex flex-col mb-6 gap-2">
           <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Medical Record Categories</h2>
           <p className="text-slate-600 text-base font-medium">Select a category below to edit the student's medical information. Each section saves independently.</p>
-          {isPOC && (
-            <div className="mt-4 p-4 bg-emerald-50 border border-emerald-100 rounded-xl flex items-start gap-4">
-              <div className="p-2 bg-white rounded-lg shadow-sm">
-                <Activity className="h-5 w-5 text-emerald-600" />
-              </div>
-              <div>
-                <p className="text-emerald-900 font-bold text-sm uppercase tracking-wider mb-1">School Representative Access</p>
-                <p className="text-emerald-700 text-sm leading-relaxed">
-                  You are authorized to update <strong>General Information and Community Medicine</strong> details for this student.
-                  {dynamicStatus === "UPCOMING" ? (
-                    <span> Please complete all entries at least <strong>one day prior</strong> to the event.</span>
-                  ) : (
-                    <span className="text-amber-700 font-bold italic block mt-1">
-                      <AlertCircle className="inline h-4 w-4 mr-1" />
-                      Editing window is now closed.
-                    </span>
-                  )}
-                </p>
-              </div>
-            </div>
-          )}
         </div>
 
         <StudentCategoryGrid

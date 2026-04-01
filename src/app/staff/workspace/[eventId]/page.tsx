@@ -34,10 +34,9 @@ export default async function EventWorkspace({ params }: { params: Promise<{ eve
   if (!event) return notFound();
 
   const isStaff = event.eventStaff.some((s: any) => s.user.id === session?.user?.id);
-  const isPOC = event.pocEmail?.toLowerCase() === session?.user?.email?.toLowerCase();
   const isAdmin = session?.user?.role === "ADMIN";
 
-  if (!isAdmin && !isStaff && !isPOC) {
+  if (!isAdmin && !isStaff) {
     return redirect("/staff/dashboard");
   }
 
@@ -55,8 +54,6 @@ export default async function EventWorkspace({ params }: { params: Promise<{ eve
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         formConfig={event.formConfig as any}
         currentUserId={session?.user?.id || ""}
-        isPOC={isPOC}
-        pocEmail={event.pocEmail || ""}
       />
     </div>
   );

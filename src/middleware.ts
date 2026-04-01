@@ -8,12 +8,22 @@ export default withAuth(
 
     // Route Protection Logic
     if (pathname.startsWith("/admin") && token?.role !== "ADMIN") {
+      if (token?.role === "SCHOOL_POC") return NextResponse.redirect(new URL("/poc/dashboard", req.url));
       return NextResponse.redirect(new URL("/staff/dashboard", req.url));
     }
 
-    if (pathname.startsWith("/staff") && token?.role === "ADMIN") {
-      // Admins likely want to go to their own dashboard, not staff dashboard
-      return NextResponse.redirect(new URL("/admin/dashboard", req.url));
+    if (pathname.startsWith("/staff")) {
+      if (token?.role === "ADMIN") {
+        return NextResponse.redirect(new URL("/admin/dashboard", req.url));
+      }
+      if (token?.role === "SCHOOL_POC") {
+        return NextResponse.redirect(new URL("/poc/dashboard", req.url));
+      }
+    }
+
+    if (pathname.startsWith("/poc") && token?.role !== "SCHOOL_POC") {
+      if (token?.role === "ADMIN") return NextResponse.redirect(new URL("/admin/dashboard", req.url));
+      return NextResponse.redirect(new URL("/staff/dashboard", req.url));
     }
 
     return NextResponse.next();
@@ -26,5 +36,5 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: ["/admin/:path*", "/staff/:path*"],
+  matcher: ["/admin/:path*", "/staff/:path*", "/poc/:path*"],
 };

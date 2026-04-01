@@ -58,24 +58,12 @@ export default async function CategoryEditForm({ params }: { params: Promise<{ e
   const currentUserId = session?.user?.id || "";
   const isAdmin = session?.user?.role === "ADMIN";
   const isAssignedDoctor = (sectionAssignments[category] || []).includes(currentUserId);
-  const isPOC = event.pocEmail?.toLowerCase() === session?.user?.email?.toLowerCase();
   const isEventHead = formConfig.eventHeadId === currentUserId;
 
-  let isSectionLockedForUser = !isAdmin && !isAssignedDoctor && !isPOC && !isEventHead;
+  let isSectionLockedForUser = !isAdmin && !isAssignedDoctor && !isEventHead;
   let readOnlyReason = "";
 
-  if (isPOC && !isAdmin) {
-    if (category !== "communityMed" && category !== "demographics") {
-      isSectionLockedForUser = true;
-      readOnlyReason = "School representatives can only edit the General Information and Community Medicine sections.";
-    } else if (dynamicStatus !== "UPCOMING") {
-      // For communityMed, POC can edit till day before the event (UPCOMING)
-      isSectionLockedForUser = true;
-      readOnlyReason = "The editing window for school representatives has closed (deadline was 1 day prior to the event).";
-    } else {
-      isSectionLockedForUser = false; // POC can edit communityMed in UPCOMING status
-    }
-  } else if (!isAdmin && !isAssignedDoctor && !isEventHead) {
+  if (!isAdmin && !isAssignedDoctor && !isEventHead) {
     readOnlyReason = "You are not assigned to this medical section. You can view the data but cannot make edits.";
   }
 
@@ -98,7 +86,6 @@ export default async function CategoryEditForm({ params }: { params: Promise<{ e
       userId={session?.user?.id || ""}
       customCategoryBlock={customCategoryConfig}
       student={student}
-      isPOC={isPOC}
     />
   );
 }

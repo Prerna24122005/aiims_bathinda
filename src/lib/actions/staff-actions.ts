@@ -41,7 +41,7 @@ export async function addStudentToEvent(data: {
       eventDate.setHours(0, 0, 0, 0);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      
+
       if (today >= eventDate) {
         throw new Error("Deadline passed: School representatives can only add students until the day before the event.");
       }
@@ -116,7 +116,7 @@ export async function bulkAddStudentsToEvent(data: {
       eventDate.setHours(0, 0, 0, 0);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      
+
       if (today >= eventDate) {
         throw new Error("Deadline passed: School representatives can only add students until the day before the event.");
       }
@@ -128,7 +128,7 @@ export async function bulkAddStudentsToEvent(data: {
       eventDate.setHours(0, 0, 0, 0);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      
+
       if (today >= eventDate) {
         throw new Error("Deadline passed: School representatives can only add students until the day before the event.");
       }
@@ -208,6 +208,7 @@ export async function updateStaffPassword(oldPassword: string, newPassword: stri
     });
 
     revalidatePath("/staff/dashboard");
+    revalidatePath("/poc/dashboard");
     return { success: true };
   } catch (error) {
     console.error("Failed to update password:", error);

@@ -29,6 +29,8 @@ export function CategoryEditFormClient({
   customCategoryBlock,
   student,
   isPOC = false,
+  basePath,
+  userRole,
 }: {
   eventId: string,
   studentId: string,
@@ -42,9 +44,10 @@ export function CategoryEditFormClient({
   userId: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   customCategoryBlock?: any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   student?: any,
   isPOC?: boolean,
+  basePath?: string,
+  userRole?: string,
 }) {
   const router = useRouter();
 
@@ -110,7 +113,7 @@ export function CategoryEditFormClient({
     setIsSaving(false);
 
     if (result.success) {
-      router.push(`/staff/workspace/${eventId}/student/${studentId}`);
+      router.push(`${basePath || '/staff'}/workspace/${eventId}/student/${studentId}`);
     } else {
       setError(result.error || "Failed to save category");
     }
@@ -493,14 +496,14 @@ export function CategoryEditFormClient({
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col pb-24">
-      <Navbar role="MEDICAL_STAFF" userName={userName || "Staff"} />
+      <Navbar role={userRole || "MEDICAL_STAFF"} userName={userName || "Staff"} />
 
       {/* Category Editor Header */}
       <div className="bg-white border-b shrink-0 z-20 shadow-sm relative">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3 w-full">
           <div className="flex items-start sm:items-center justify-between gap-4">
             <div className="flex items-start sm:items-center gap-4">
-              <Link href={`/staff/workspace/${eventId}/student/${studentId}`}>
+              <Link href={`${basePath || '/staff'}/workspace/${eventId}/student/${studentId}`}>
                 <Button variant="ghost" size="icon" className="h-10 w-10 mt-1 sm:mt-0 rounded-full border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50 text-emerald-600 transition-all shadow-sm">
                   <ArrowLeft className="h-5 w-5" />
                 </Button>
@@ -616,7 +619,7 @@ export function CategoryEditFormClient({
               <FileCheck className="h-4 w-4" /> Editing
             </div>
             <div className="flex gap-3">
-              <Link href={`/staff/workspace/${eventId}/student/${studentId}`}>
+              <Link href={`${basePath || '/staff'}/workspace/${eventId}/student/${studentId}`}>
                 <Button variant="outline">Cancel</Button>
               </Link>
               <Button onClick={handleSave} disabled={isSaving} className="bg-emerald-600 hover:bg-emerald-700">

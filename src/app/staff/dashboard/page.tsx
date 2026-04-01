@@ -12,16 +12,13 @@ import { redirect } from "next/navigation";
 
 export default async function StaffDashboard() {
   const session = await getServerSession(authOptions);
-  
+
   if (!session?.user?.id) return null;
 
-  // Fetch events where user is assigned staff OR they are the POC for the school
+  // Fetch events where user is assigned staff
   const events = await (prisma.event as any).findMany({
     where: {
-      OR: [
-        { eventStaff: { some: { userId: session.user.id } } },
-        { pocEmail: session.user.email || "undefined" }
-      ]
+      eventStaff: { some: { userId: session.user.id } }
     },
     include: {
       eventStaff: {
@@ -54,7 +51,7 @@ export default async function StaffDashboard() {
     today.setHours(0, 0, 0, 0);
     const evDate = new Date(event.eventDate);
     evDate.setHours(0, 0, 0, 0);
-    
+
     let dynamicStatus = "UPCOMING";
     if (evDate.getTime() === today.getTime()) {
       dynamicStatus = "ACTIVE";
@@ -107,11 +104,11 @@ export default async function StaffDashboard() {
     }
     return a.date.getTime() - b.date.getTime();
   });
-  
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <Navbar role={session?.user?.role || "MEDICAL_STAFF"} userName={session?.user?.name || "Dr. Staff"} />
-      
+
       <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8">
         <StaffDashboardHeader />
 

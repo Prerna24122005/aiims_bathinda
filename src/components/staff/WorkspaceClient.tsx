@@ -35,8 +35,6 @@ export function WorkspaceClient({
   eventStaff,
   formConfig,
   currentUserId,
-  isPOC = false,
-  pocEmail = "",
 }: {
   eventId: string;
   students: StudentData[];
@@ -47,8 +45,6 @@ export function WorkspaceClient({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   formConfig: any;
   currentUserId: string;
-  isPOC?: boolean;
-  pocEmail?: string;
 }) {
   const router = useRouter();
   const [search, setSearch] = useState("");
@@ -285,15 +281,10 @@ export function WorkspaceClient({
                 <Badge variant={dynamicStatus === "ACTIVE" ? "default" : "secondary"} className="text-xs">
                   {dynamicStatus === "ACTIVE" ? "Active Event" : dynamicStatus === "PAST" ? "Past Event" : "Upcoming Event"}
                 </Badge>
-                {isPOC && (
-                  <Badge className="bg-indigo-100 text-indigo-700 border-indigo-200 font-black tracking-wider px-2 py-0.5 ml-2">
-                    SCHOOL REPRESENTATIVE
-                  </Badge>
-                )}
               </div>
               <h1 className="text-2xl font-bold text-slate-900">{schoolName}</h1>
               <p className="text-sm text-slate-500">
-                {new Date(eventDate).toLocaleDateString()} • {location} • <span className="text-emerald-600 font-medium">{pocEmail}</span>
+                {new Date(eventDate).toLocaleDateString()} • {location}
               </p>
             </div>
 
@@ -338,8 +329,7 @@ export function WorkspaceClient({
               const now = new Date();
               now.setHours(0, 0, 0, 0);
 
-              const isAfterDeadline = isPOC && now >= eventDay;
-              const canAdd = dynamicStatus !== "PAST" && !isAfterDeadline;
+              const canAdd = dynamicStatus !== "PAST";
 
               if (!canAdd) return null;
 
@@ -474,10 +464,10 @@ export function WorkspaceClient({
                     <tr
                       key={student.id}
                       onClick={() => {
-                        if (dynamicStatus === "UPCOMING" && !isPOC) return;
+                        if (dynamicStatus === "UPCOMING") return;
                         router.push(`/staff/workspace/${eventId}/student/${student.id}`);
                       }}
-                      className={`transition-colors group ${(dynamicStatus === "UPCOMING" && !isPOC) ? 'opacity-60 bg-slate-50' : 'cursor-pointer hover:bg-slate-50/80 hover:shadow-sm'
+                      className={`transition-colors group ${dynamicStatus === "UPCOMING" ? 'opacity-60 bg-slate-50' : 'cursor-pointer hover:bg-slate-50/80 hover:shadow-sm'
                         }`}
                     >
                       <td className="px-6 py-4 font-medium text-slate-900 text-center">
@@ -492,11 +482,11 @@ export function WorkspaceClient({
                       </td>
                       <td className="px-6 py-4 text-slate-500 text-center hidden md:table-cell">{lastUpdated}</td>
                       <td className="px-6 py-4 text-center">
-                        {(dynamicStatus === "UPCOMING" && !isPOC) ? (
+                        {dynamicStatus === "UPCOMING" ? (
                           <span className="text-slate-400 italic text-sm">Not Started</span>
                         ) : (
                           <span className="text-emerald-600 font-bold group-hover:text-emerald-700 transition flex items-center justify-center gap-1">
-                            {dynamicStatus === "PAST" ? "View" : isPOC ? "Details" : "Open"} <Activity className="h-4 w-4" />
+                            {dynamicStatus === "PAST" ? "View" : "Open"} <Activity className="h-4 w-4" />
                           </span>
                         )}
                       </td>
