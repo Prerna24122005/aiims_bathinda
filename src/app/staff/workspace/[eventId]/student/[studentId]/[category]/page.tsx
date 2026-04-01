@@ -59,8 +59,9 @@ export default async function CategoryEditForm({ params }: { params: Promise<{ e
   const isAdmin = session?.user?.role === "ADMIN";
   const isAssignedDoctor = (sectionAssignments[category] || []).includes(currentUserId);
   const isPOC = event.pocEmail?.toLowerCase() === session?.user?.email?.toLowerCase();
+  const isEventHead = formConfig.eventHeadId === currentUserId;
 
-  let isSectionLockedForUser = !isAdmin && !isAssignedDoctor && !isPOC;
+  let isSectionLockedForUser = !isAdmin && !isAssignedDoctor && !isPOC && !isEventHead;
   let readOnlyReason = "";
 
   if (isPOC && !isAdmin) {
@@ -74,7 +75,7 @@ export default async function CategoryEditForm({ params }: { params: Promise<{ e
     } else {
       isSectionLockedForUser = false; // POC can edit communityMed in UPCOMING status
     }
-  } else if (!isAdmin && !isAssignedDoctor) {
+  } else if (!isAdmin && !isAssignedDoctor && !isEventHead) {
     readOnlyReason = "You are not assigned to this medical section. You can view the data but cannot make edits.";
   }
 

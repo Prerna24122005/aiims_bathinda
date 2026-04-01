@@ -127,10 +127,11 @@ export default async function StudentRecordMasterView({ params }: { params: Prom
 
   const isAdmin = session?.user?.role === "ADMIN";
   const assignmentsByTag = (formConfig as any).sectionAssignments || {};
+  const isEventHead = (formConfig as any).eventHeadId === session?.user?.id;
 
   // Calculate assigned categories
-  const assignedCategoryIds = isAdmin
-    ? ALL_CATEGORY_DEFINITIONS.map(c => c.id) // Admins see all
+  const assignedCategoryIds = isAdmin || isEventHead
+    ? ALL_CATEGORY_DEFINITIONS.map(c => c.id) // Admins and Event Heads see all
     : isPOC
       ? ["demographics", "communityMed"] // POC sees these
       : ALL_CATEGORY_DEFINITIONS
