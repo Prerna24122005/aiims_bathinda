@@ -81,7 +81,7 @@ export function EventDetailManagement({
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 mb-1">
                   <h1 className="text-xl font-bold text-slate-900 tracking-tight">{event.schoolDetails}</h1>
-                  <Badge className="bg-emerald-500 text-white border-none text-[9px] font-semibold uppercase px-2 py-0.5 rounded-full">
+                  <Badge className={`text-white border-none text-[9px] font-semibold uppercase px-2 py-0.5 rounded-full ${dynamicStatus.includes("ACTIVE") ? 'bg-emerald-500' : dynamicStatus === "PAST" ? 'bg-slate-400' : 'bg-blue-600'}`}>
                     {dynamicStatus}
                   </Badge>
                 </div>

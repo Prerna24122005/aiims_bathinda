@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { createEvent } from "@/lib/actions/admin-actions";
@@ -22,6 +22,13 @@ export function CreateEventModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [minDate, setMinDate] = useState<string>("");
+
+  useEffect(() => {
+    const today = new Date();
+    const localDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    setMinDate(localDate);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -57,10 +64,9 @@ export function CreateEventModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-      <div className="bg-white rounded-lg p-6 max-w-lg w-full shadow-xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={onClose}>
+      <div className="bg-white rounded-lg p-6 max-w-lg w-full shadow-xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <h3 className="text-xl font-bold text-gray-900 mb-1">Create New Health Camp Event</h3>
-        <p className="text-sm text-gray-500 mb-6">Manually configure an event and assign staff.</p>
 
         {error && <div className="p-3 mb-4 text-sm text-red-700 bg-red-50 rounded-lg">{error}</div>}
 
@@ -77,7 +83,7 @@ export function CreateEventModal({
               name="date"
               type="date"
               className="w-full p-2 border rounded-md"
-              min={new Date().toISOString().split('T')[0]}
+              min={minDate}
             />
           </div>
 
@@ -93,8 +99,19 @@ export function CreateEventModal({
           </div>
 
           <div className="space-y-1">
-            <label className="text-sm font-medium text-slate-700">POC Phone</label>
-            <input required name="pocPhone" type="text" className="w-full p-2 border rounded-md" placeholder="+91 98765XXXXX" />
+            <label className="text-sm font-medium text-slate-700">Mobile Number</label>
+            <input
+              required
+              name="pocPhone"
+              type="tel"
+              pattern="^\+91\d{10}$"
+              maxLength={13}
+              className="w-full p-2 border rounded-md"
+              placeholder="e.g. +9112332xxxxx"
+              title="Format: +91 followed by 10 digits"
+              onInvalid={(e) => (e.target as HTMLInputElement).setCustomValidity("Please enter a valid mobile number starting with +91 followed by 10 digits.")}
+              onInput={(e) => (e.target as HTMLInputElement).setCustomValidity("")}
+            />
           </div>
 
           <div className="pt-2">

@@ -28,7 +28,8 @@ export function StaffDirectoryClient({
     if (!srch) return true;
     return (
       staff.fullName.toLowerCase().includes(srch) ||
-      staff.email.toLowerCase().includes(srch)
+      staff.email.toLowerCase().includes(srch) ||
+      (staff.department && staff.department.toLowerCase().includes(srch))
     );
   });
 
@@ -44,8 +45,8 @@ export function StaffDirectoryClient({
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input
               type="text"
-              placeholder="Search by name or email..."
-              className="pl-10 w-full sm:w-64 bg-slate-50 border-slate-200 focus-visible:ring-emerald-500 rounded-full"
+              placeholder="Search by name, email, or department..."
+              className="pl-10 w-full sm:w-72 bg-slate-50 border-slate-200 focus-visible:ring-emerald-500 rounded-full"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -80,15 +81,10 @@ export function StaffDirectoryClient({
           <div className="divide-y divide-slate-100">
             {filteredStaff.map(staff => (
               <div key={staff.id} className="grid grid-cols-[minmax(250px,1fr)_minmax(200px,1fr)_minmax(150px,1fr)_160px] items-center px-6 py-4 hover:bg-slate-50/80 transition-colors group">
-                <div className="flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-full bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center shadow-sm border border-emerald-50 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                    {staff.fullName.charAt(0)}
-                  </div>
-                  <div>
-                    <span className="font-bold text-slate-900 group-hover:text-emerald-600 transition-colors block">
-                      {staff.fullName}
-                    </span>
-                  </div>
+                <div>
+                  <span className="text-[15px] font-semibold tracking-wide text-slate-800 group-hover:text-emerald-600 transition-colors block">
+                    {staff.fullName}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2 text-slate-600">
                   <Mail className="h-4 w-4 text-slate-400" />

@@ -22,6 +22,7 @@ type EventType = {
 export function EventsTabClient({ events, actionButton }: { events: EventType[], actionButton?: React.ReactNode }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"ALL" | "UPCOMING" | "ACTIVE (TODAY)" | "PAST">("ALL");
+  const [showPastEvents, setShowPastEvents] = useState(false);
 
   const getDynamicStatus = (date: Date) => {
     const evDate = new Date(date);
@@ -77,6 +78,9 @@ export function EventsTabClient({ events, actionButton }: { events: EventType[],
     return new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime(); // Closest upcoming first
   });
 
+  const activeAndUpcomingEvents = filteredEvents.filter(e => getDynamicStatus(e.eventDate) !== "PAST");
+  const pastEvents = filteredEvents.filter(e => getDynamicStatus(e.eventDate) === "PAST");
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-100">
@@ -131,13 +135,13 @@ export function EventsTabClient({ events, actionButton }: { events: EventType[],
         </Card>
       ) : (
         <div className="flex flex-col gap-2">
-          {filteredEvents.map(event => {
+          {activeAndUpcomingEvents.map(event => {
             const dynamicStatus = getDynamicStatus(event.eventDate);
 
             return (
               <Link href={`/admin/events/${event.id}`} key={event.id} className="group">
                 <Card className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-2 sm:p-2 border border-slate-200 hover:border-emerald-300 hover:shadow-md transition-all duration-200 bg-white rounded-xl overflow-hidden relative">
-                  <div className={`absolute left-0 top-0 bottom-0 w-1 ${dynamicStatus.includes("ACTIVE") ? 'bg-emerald-500' : dynamicStatus === "PAST" ? 'bg-slate-300' : 'bg-emerald-500'}`} />
+                  <div className={`absolute left-0 top-0 bottom-0 w-1 ${dynamicStatus.includes("ACTIVE") ? 'bg-emerald-500' : dynamicStatus === "PAST" ? 'bg-slate-300' : 'bg-blue-600'}`} />
 
                   <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 flex-1 pl-3 w-full">
                     <div className="min-w-[140px]">
@@ -145,7 +149,7 @@ export function EventsTabClient({ events, actionButton }: { events: EventType[],
                         ? 'bg-emerald-100 text-emerald-800 border-emerald-200 hover:bg-emerald-200'
                         : dynamicStatus === "PAST"
                           ? 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'
-                          : 'bg-emerald-100 text-emerald-800 border-emerald-200 hover:bg-emerald-200'
+                          : 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700'
                         }`}>
                         {dynamicStatus}
                       </Badge>
@@ -208,6 +212,84 @@ export function EventsTabClient({ events, actionButton }: { events: EventType[],
               </Link>
             )
           })}
+
+          {pastEvents.length > 0 && (
+            <div className="mt-10 w-full">
+              <br />
+              <div className="flex items-center gap-4 w-full mb-6">
+                <div className="flex-1 h-px bg-slate-300" />
+                <button
+                  type="button"
+                  onClick={() => setShowPastEvents(!showPastEvents)}
+                  className="flex items-center gap-2 text-sm font-bold text-slate-700 hover:text-slate-900 hover:bg-slate-50 px-6 py-2 rounded-full border border-slate-200 transition-all shadow-sm"
+                >
+                  <span>{showPastEvents ? "▼" : "▶"}</span>
+                  <span>Past Events ({pastEvents.length})</span>
+                </button>
+                <div className="flex-1 h-px bg-slate-300" />
+              </div>
+
+              {showPastEvents && (
+                <div className="mt-6 w-full flex flex-col gap-2">
+                  {pastEvents.map(event => {
+                    const dynamicStatus = getDynamicStatus(event.eventDate);
+
+                    return (
+                      <Link href={`/admin/events/${event.id}`} key={event.id} className="group">
+                        <Card className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-2 sm:p-2 border border-slate-200 hover:border-emerald-300 hover:shadow-md transition-all duration-200 bg-white rounded-xl overflow-hidden relative">
+                          <div className="absolute left-0 top-0 bottom-0 w-1 bg-slate-300" />
+
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 flex-1 pl-3 w-full">
+                            <div className="min-w-[140px]">
+                              <Badge className="px-2 py-0 text-[10px] font-semibold rounded-full border bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200">
+                                {dynamicStatus}
+                              </Badge>
+                              <p className="text-xs font-semibold text-slate-500 flex items-center gap-1.5 mt-0.5">
+                                {new Date(event.eventDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                              </p>
+                            </div>
+
+                            <div className="flex-1 min-w-0">
+                              <h3 className="text-lg font-bold text-slate-700 truncate">
+                                {event.schoolDetails}
+                              </h3>
+                              <div className="flex flex-wrap gap-x-4 gap-y-1 mt-0.5 font-medium uppercase tracking-tighter text-[11px]">
+                                <div className="flex items-center gap-1 text-slate-400">
+                                  <span className="text-slate-500">POC:</span>
+                                  <span className="text-slate-600 truncate max-w-[120px]">{event.pocName}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-6 mt-3 sm:mt-0 w-full sm:w-auto justify-between sm:justify-end bg-slate-50 sm:bg-transparent p-3 sm:p-0 rounded-lg sm:rounded-none">
+                              <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-[10px] sm:text-xs text-slate-400 font-medium uppercase tracking-wider">Students:</span>
+                                  <span className="text-sm font-bold text-slate-600">{event._count.students}</span>
+                                </div>
+                              </div>
+                              <div className="w-px h-4 sm:h-6 bg-slate-200 hidden sm:block"></div>
+                              <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-[10px] sm:text-xs text-slate-400 font-medium uppercase tracking-wider">Staff:</span>
+                                  <span className="text-sm font-bold text-slate-600">{event._count.eventStaff}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="hidden sm:flex items-center justify-center p-2">
+                            <div className="bg-slate-50 p-2 rounded-full group-hover:bg-slate-100 group-hover:text-slate-600 text-slate-300 transition-colors">
+                              <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                            </div>
+                          </div>
+                        </Card>
+                      </Link>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/db/prisma";
 import { revalidatePath } from "next/cache";
-import { sendRequestAcceptedEmail, sendRequestRejectedEmail, sendEventCanceledEmail } from "@/lib/email";
+import { sendRequestAcceptedEmail, sendRequestRejectedEmail, sendEventCanceledEmail, sendManualEventCreatedEmail } from "@/lib/email";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import bcryptjs from "bcryptjs";
@@ -228,6 +228,13 @@ export async function createEvent(
         });
       }
     });
+
+    // Send Manual Event Creation Email
+    try {
+      await sendManualEventCreatedEmail(data.pocEmail, data.pocName, data.schoolDetails, data.eventDate);
+    } catch (e) {
+      console.error("Non-fatal: Email dispatch failed after manual event creation.", e);
+    }
 
     revalidatePath("/admin/dashboard");
     return { success: true };

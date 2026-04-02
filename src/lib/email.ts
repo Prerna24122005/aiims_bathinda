@@ -140,3 +140,41 @@ export const sendEventCanceledEmail = async (to: string, pocName: string, school
         return false;
     }
 };
+
+export const sendManualEventCreatedEmail = async (to: string, pocName: string, schoolName: string, date: Date) => {
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to,
+        subject: 'New Health Camp Event Scheduled - HealthCampPro',
+        html: `
+      <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+        <h2>Hello ${pocName},</h2>
+        <p>A new health camp event has been scheduled for <strong>${schoolName}</strong> on <strong>${new Date(date).toLocaleDateString()}</strong>.</p>
+        <p>An account has been provisioned for you to manage student records and track progress. You can log in to the portal using your email address.</p>
+        <p><strong>Initial Login Credentials:</strong></p>
+        <ul>
+          <li><strong>Email:</strong> ${to}</li>
+          <li><strong>Temporary Password:</strong> School@123</li>
+        </ul>
+        <p>Please change your password after your first login for security purposes.</p>
+        <p>We look forward to a successful health camp!</p>
+        <p>Best regards,<br/>The HealthCampPro Team</p>
+      </div>
+    `,
+    };
+
+    try {
+        if (!process.env.EMAIL_USER || !process.env.EMAIL_APP_PASSWORD) {
+            console.log("------------------------");
+            console.log("[MOCK EMAIL: MANUAL EVENT CREATED] To:", to);
+            console.log("Subject:", mailOptions.subject);
+            console.log("------------------------");
+            return true;
+        }
+        await transporter.sendMail(mailOptions);
+        return true;
+    } catch (error) {
+        console.error("Error sending email: ", error);
+        return false;
+    }
+};
