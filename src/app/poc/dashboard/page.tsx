@@ -61,6 +61,12 @@ export default async function PocDashboard() {
             return Object.values(data).some((catData: any) => catData?.status_nor === 'R');
         });
 
+        const observationStudents = (event.students as any[]).filter(stud => {
+            const data = stud.medicalRecord?.data as Record<string, any> | null;
+            if (!data) return false;
+            return Object.values(data).some((catData: any) => catData?.status_nor === 'O');
+        });
+
         const eventHeadId = (event.formConfig as any)?.eventHeadId;
         const eventHead = (event.eventStaff as any[]).find(s => s.user.id === eventHeadId)?.user?.fullName || "Not Assigned";
 
@@ -72,6 +78,7 @@ export default async function PocDashboard() {
             status: dynamicStatus,
             studentCount: event._count.students,
             referredCount: referredStudents.length,
+            observationCount: observationStudents.length,
             pocName: event.pocName,
             eventHeadName: eventHead,
         };

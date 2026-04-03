@@ -4,6 +4,7 @@ import { CalendarDays, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { RealTimeRefresher } from "@/components/shared/RealTimeRefresher";
 
 type AssignedEventType = {
@@ -14,11 +15,14 @@ type AssignedEventType = {
     status: string;
     studentCount: number;
     referredCount: number;
+    observationCount: number;
     pocName: string;
     eventHeadName: string;
 };
 
 export function PocEventsClient({ events }: { events: AssignedEventType[] }) {
+    const router = useRouter();
+
     return (
         <div className="space-y-6">
             <RealTimeRefresher />
@@ -73,13 +77,24 @@ export function PocEventsClient({ events }: { events: AssignedEventType[] }) {
                                     </div>
 
                                     <div className="flex items-center gap-6 mt-3 sm:mt-0 w-full sm:w-auto justify-between sm:justify-end bg-slate-50 sm:bg-transparent p-3 sm:p-0 rounded-lg sm:rounded-none pr-4">
-                                        {event.referredCount > 0 && (
-                                            <div onClick={e => e.stopPropagation()}>
-                                                <span className="inline-flex items-center cursor-default text-[10px] sm:text-xs font-bold text-red-700 bg-red-50 px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-full border border-red-200">
+                                        <div className="flex items-center gap-1.5">
+                                            {event.referredCount > 0 && (
+                                                <div 
+                                                    onClick={e => { e.stopPropagation(); e.preventDefault(); router.push(`/poc/workspace/${event.id}/referred`); }}
+                                                    className="inline-flex items-center cursor-pointer text-[10px] sm:text-xs font-bold text-red-700 bg-red-50 px-2 py-1 sm:px-2.5 sm:py-1 rounded-full border border-red-200 hover:bg-red-100 transition-colors"
+                                                >
                                                     {event.referredCount} Referred
-                                                </span>
-                                            </div>
-                                        )}
+                                                </div>
+                                            )}
+                                            {event.observationCount > 0 && (
+                                                <div 
+                                                    onClick={e => { e.stopPropagation(); e.preventDefault(); router.push(`/poc/workspace/${event.id}/observation`); }}
+                                                    className="inline-flex items-center cursor-pointer text-[10px] sm:text-xs font-bold text-amber-700 bg-amber-50 px-2 py-1 sm:px-2.5 sm:py-1 rounded-full border border-amber-200 hover:bg-amber-100 transition-colors"
+                                                >
+                                                    {event.observationCount} Observe
+                                                </div>
+                                            )}
+                                        </div>
 
                                         <div className="w-px h-4 sm:h-6 bg-slate-200 hidden sm:block"></div>
 
