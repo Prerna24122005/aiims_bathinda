@@ -275,13 +275,13 @@ export function CategoryEditFormClient({
   useEffect(() => {
     if (Object.keys(initialData || {}).length > 0) {
       // If there's already data, check completion
-      const isComplete = requiredFields.length > 0 
+      const isComplete = requiredFields.length > 0
         ? requiredFields.every(field => {
-            const val = initialData[field];
-            return val !== undefined && val !== null && val !== "";
-          })
+          const val = initialData[field];
+          return val !== undefined && val !== null && val !== "";
+        })
         : true;
-      
+
       if (isComplete) {
         setIsSaved(true);
       } else {
@@ -677,7 +677,7 @@ export function CategoryEditFormClient({
 
   return (
     <div className={`flex flex-col ${isEmbedded ? '' : 'min-h-screen bg-slate-50 pb-12 pt-16'}`}>
-      {!isEmbedded && <Navbar />}
+      {!isEmbedded && <Navbar userName={userName} role={userRole || "MEDICAL_STAFF"} />}
 
       {/* Category Editor Header - Only show if NOT embedded to avoid duplicates */}
       {!isEmbedded && (

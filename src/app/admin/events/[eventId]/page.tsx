@@ -59,7 +59,7 @@ export default async function AdminEventDetails({
     },
     select: { userId: true }
   });
-  const unavailableStaffIds = conflictingAssignments.map(s => s.userId);
+  const unavailableStaffIds = conflictingAssignments.map((s: { userId: string }) => s.userId);
 
   // Get all Medical Staff for assignment modal, excluding those already on a camp today
   const allMedicalStaff = await prisma.user.findMany({

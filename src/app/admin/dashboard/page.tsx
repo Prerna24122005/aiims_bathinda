@@ -8,6 +8,7 @@ import { authOptions } from "@/lib/auth";
 import { getPendingRequests, getMedicalStaff } from "@/lib/actions/admin-actions";
 import { prisma } from "@/lib/db/prisma";
 import Link from "next/link";
+import { EventStatus } from "@prisma/client";
 
 import { RequestsTabClient } from "@/components/admin/RequestsTabClient";
 import { EventsTabClient } from "@/components/admin/EventsTabClient";
@@ -27,7 +28,7 @@ export default async function AdminDashboard() {
   const allEvents = await prisma.event.findMany({
     where: {
       status: {
-        not: "CANCELLED"
+        not: EventStatus.CANCELLED
       }
     },
     orderBy: { eventDate: "asc" },
