@@ -68,7 +68,7 @@ export default async function ObservationStudentsPage({ params }: { params: Prom
         <div className="flex flex-col">
             <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 pb-4 sm:pb-6 lg:pb-8">
                 {/* Sticky Header Section */}
-                <div className="sticky top-0 bg-slate-50/95 backdrop-blur-sm pt-2 pb-6 mb-4 z-20 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 shadow-[0_1px_0_0_rgba(0,0,0,0.05)]">
+                <div className="sticky top-0 bg-white/95 backdrop-blur-sm pt-2 pb-6 mb-4 z-20 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 shadow-[0_1px_0_0_rgba(0,0,0,0.05)]">
                     <div className="flex items-center gap-3 mb-2">
                         <Link href={`/staff/workspace/${eventId}`}>
                             <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50 text-emerald-600 transition-all shadow-sm">
