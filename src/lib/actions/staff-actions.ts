@@ -159,7 +159,7 @@ export async function bulkAddStudentsToEvent(data: {
     await prisma.$transaction(async (tx) => {
       // 1. Create all students and get their IDs back
       const createdStudents = await Promise.all(
-        students.map(s => tx.student.create({
+        students.map((s: any) => tx.student.create({
           data: {
             eventId,
             firstName: s.firstName,

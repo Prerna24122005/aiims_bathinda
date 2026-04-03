@@ -329,7 +329,7 @@ export async function assignStaffToEvent(eventId: string, staffIds: string[]) {
       }
     });
 
-    const existingIds = new Set(existing.map(e => e.userId));
+    const existingIds = new Set(existing.map((e: any) => e.userId));
     const newStaffIds = staffIds.filter(id => !existingIds.has(id));
 
     if (newStaffIds.length > 0) {
@@ -389,7 +389,7 @@ export async function checkStaffDeletion(userId: string) {
     return {
       success: true,
       hasUpcoming: upcomingAssignments.length > 0,
-      upcomingEvents: upcomingAssignments.map(a => a.event),
+      upcomingEvents: upcomingAssignments.map((a: any) => a.event),
       upcomingCount: upcomingAssignments.length
     };
   } catch (error) {
