@@ -72,7 +72,7 @@ export default async function AdminEventDetails({
     orderBy: { fullName: 'asc' }
   });
 
-  const assignedStaffIds = event.eventStaff.map(s => s.userId);
+  const assignedStaffIds = event.eventStaff.map((s: any) => s.userId);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const currentEventHeadId = (event.formConfig as any)?.eventHeadId;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -81,7 +81,7 @@ export default async function AdminEventDetails({
   // Calculate statistics over the joined tables
   const totalStudents = event.students.length;
   // Count how many students have a medical record that is fully completed
-  const completedRecords = event.students.filter(s => s.medicalRecord?.status === "COMPLETED").length;
+  const completedRecords = event.students.filter((s: any) => s.medicalRecord?.status === "COMPLETED").length;
   const progressPercent = totalStudents > 0 ? Math.round((completedRecords / totalStudents) * 100) : 0;
 
   // Compute Dynamic Status
