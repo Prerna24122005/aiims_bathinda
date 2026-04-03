@@ -59,6 +59,17 @@ export default async function PocStudentRecordMasterView(props: {
     }
 
     const recordData = (student.medicalRecord?.data as Record<string, any>) || {};
+    
+    // Extract BMI data
+    const genExamData = recordData.general_examination_merged || {};
+    const height = parseFloat(genExamData.height);
+    const weight = parseFloat(genExamData.weight);
+    let bmi = null;
+    if (height && weight) {
+        const heightInMeters = height / 100;
+        bmi = (weight / (heightInMeters * heightInMeters)).toFixed(1);
+    }
+
     let completedCount = 0;
 
     const customCategories = Array.isArray(formConfig.customCategories) ? formConfig.customCategories : [];
@@ -152,10 +163,13 @@ export default async function PocStudentRecordMasterView(props: {
                                     {globalStatus.replace('_', ' ')}
                                 </Badge>
                             </div>
-                            <p className="text-base font-semibold text-slate-600 mt-2 flex gap-4">
-                                <span>Class: {student.classSec}</span>
-                                <span>Age: {student.age}</span>
-                                <span>Gender: {student.gender}</span>
+                            <p className="text-base font-semibold text-slate-600 mt-2 flex flex-wrap gap-4">
+                                <span className="flex items-center gap-1.5"><span className="opacity-40">Class:</span> {student.classSec}</span>
+                                <span className="flex items-center gap-1.5"><span className="opacity-40">Age:</span> {student.age}</span>
+                                <span className="flex items-center gap-1.5"><span className="opacity-40">Gender:</span> {student.gender}</span>
+                                <span className="flex items-center gap-1.5 text-emerald-600">
+                                    <span className="opacity-60 text-slate-500">BMI:</span> {bmi || 'NA'}
+                                </span>
                             </p>
                         </div>
 

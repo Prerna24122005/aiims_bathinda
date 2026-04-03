@@ -71,7 +71,7 @@ export function CategoryEditFormClient({
   ];
 
   const NUMBER_FIELDS = [
-    "age", "pinCode", "phone", "mobile", "physicianContact", "height", "weight"
+    "age", "pinCode", "phone", "mobile", "physicianContact", "height", "weight", "bmi"
   ];
 
   const SELECT_FIELDS: Record<string, { label: string, value: string }[]> = {
@@ -209,6 +209,18 @@ export function CategoryEditFormClient({
           if (calculatedAge >= 0) newData.age = calculatedAge.toString();
         } catch (e) { /* ignore */ }
       }
+
+      // BMI calculation
+      if (category === "general_examination_merged" && (field === "height" || field === "weight")) {
+        const h = parseFloat(field === "height" ? value : newData.height);
+        const w = parseFloat(field === "weight" ? value : newData.weight);
+        if (h > 0 && w > 0) {
+          newData.bmi = (w / Math.pow(h / 100, 2)).toFixed(1);
+        } else {
+          newData.bmi = "";
+        }
+      }
+
       return newData;
     });
   };
@@ -434,6 +446,7 @@ export function CategoryEditFormClient({
           { id: "spectaclesLeft", label: "Spectacles (Left Power)" },
           { id: "height", label: "Height (cm)" },
           { id: "weight", label: "Weight (kg)" },
+          { id: "bmi", label: "BMI" },
           { id: "anaemia", label: "Anaemia Assessment" },
           { id: "systemicExam", label: "General Remarks" },
         ],
@@ -624,11 +637,18 @@ export function CategoryEditFormClient({
                     <span className="flex items-center gap-1"><span className="opacity-40">Class:</span> {student?.classSec}</span>
                     <span className="flex items-center gap-1"><span className="opacity-40">Age:</span> {student?.age}</span>
                     {(() => {
-                      const recordData = (student?.medicalRecord?.data as Record<string, any>) || {};
-                      const commMedData = recordData.communityMed || {};
-                      const height = parseFloat(commMedData.height);
-                      const weight = parseFloat(commMedData.weight);
-                      const bmi = (height && weight) ? (weight / Math.pow(height / 100, 2)).toFixed(1) : "NA";
+                      let bmi = "NA";
+                      if (category === "general_examination_merged") {
+                        const h = parseFloat(formData.height);
+                        const w = parseFloat(formData.weight);
+                        if (h && w) bmi = (w / Math.pow(h / 100, 2)).toFixed(1);
+                      } else {
+                        const recordData = (student?.medicalRecord?.data as Record<string, any>) || {};
+                        const genData = recordData.general_examination_merged || {};
+                        const height = parseFloat(genData.height);
+                        const weight = parseFloat(genData.weight);
+                        if (height && weight) bmi = (weight / Math.pow(height / 100, 2)).toFixed(1);
+                      }
                       return (
                         <span className="flex items-center gap-1 text-emerald-600">
                           <span className="opacity-60 text-slate-500 font-bold">BMI:</span> {bmi}
