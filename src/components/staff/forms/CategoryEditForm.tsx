@@ -231,11 +231,20 @@ export function CategoryEditFormClient({
           { id: "pinCode", label: "Pin Code" },
           { id: "phone", label: "Phone" },
           { id: "mobile", label: "Mobile" },
+          { id: "familyPhysicianName", label: "Family Physician Name" },
+          { id: "physicianContact", label: "Physician Contact" },
+          { id: "jaundice", label: "Jaundice" },
           { id: "allergies", label: "Allergies" },
+          { id: "bloodTransfusion", label: "Blood Transfusion" },
           { id: "majorIllness", label: "Any major illness/operation" },
+          { id: "dentalImplant", label: "Dental Implant" },
+          { id: "braces", label: "Braces" },
+          { id: "spectaclesRight", label: "Spectacles / Lens (Right Eye)" },
+          { id: "spectaclesLeft", label: "Spectacles / Lens (Left Eye)" },
           { id: "height", label: "Height (cm)" },
           { id: "weight", label: "Weight (kg)" },
           { id: "anaemia", label: "Anaemia" },
+          { id: "systemicExam", label: "Systemic Examination" },
         ],
       },
       {
@@ -246,6 +255,7 @@ export function CategoryEditFormClient({
           { id: "hepB2", label: "Hepatitis B (2nd Dose)" },
           { id: "hepB3", label: "Hepatitis B (3rd Dose)" },
           { id: "typhoid", label: "Typhoid" },
+          { id: "dptPolio", label: "DPT / Polio Booster" },
           { id: "tetanus", label: "Tetanus" },
         ],
       },
@@ -256,7 +266,10 @@ export function CategoryEditFormClient({
           { id: "earIssues", label: "Ear Issues" },
           { id: "noseIssues", label: "Nose Issues" },
           { id: "throatIssues", label: "Throat Issues" },
+          { id: "mouthBreathing", label: "Mouth Breathing" },
           { id: "presentComplaint", label: "Present Complaint" },
+          { id: "currentMedication", label: "Current Medication" },
+          { id: "otherInfo", label: "Other Information" },
           { id: "doctorRemarks", label: "Doctor's Remarks" },
         ],
       },
@@ -264,9 +277,13 @@ export function CategoryEditFormClient({
         id: "dental_examination",
         title: "Dental Examination",
         fields: [
+          { id: "rottenTeeth", label: "Rotten Teeth" },
           { id: "cavities", label: "Cavities" },
           { id: "gumCondition", label: "Gum Condition" },
+          { id: "badBreath", label: "Bad Breath" },
           { id: "presentComplaint", label: "Present Complaint" },
+          { id: "currentMedication", label: "Current Medication" },
+          { id: "otherInfo", label: "Other Information" },
           { id: "doctorRemarks", label: "Doctor's Remarks" },
         ],
       },
@@ -277,8 +294,11 @@ export function CategoryEditFormClient({
           { id: "visionRight", label: "Vision (Right Eye)" },
           { id: "visionLeft", label: "Vision (Left Eye)" },
           { id: "cannotSeeBoard", label: "Cannot see board" },
+          { id: "rubsEyes", label: "Rubs eyes frequently" },
           { id: "spectacles", label: "Spectacles" },
           { id: "presentComplaint", label: "Present Complaint" },
+          { id: "currentMedication", label: "Current Medication" },
+          { id: "otherInfo", label: "Other Information" },
           { id: "doctorRemarks", label: "Doctor's Remarks" },
         ],
       },
@@ -287,8 +307,12 @@ export function CategoryEditFormClient({
         title: "Dermatology Examination",
         fields: [
           { id: "skinCondition", label: "Skin Condition" },
+          { id: "nailsHair", label: "Nails & Hair Condition" },
           { id: "whitePatches", label: "White Patches" },
+          { id: "cracksMouth", label: "Cracks at mouth corner" },
           { id: "presentComplaint", label: "Present Complaint" },
+          { id: "currentMedication", label: "Current Medication" },
+          { id: "otherInfo", label: "Other Information" },
           { id: "doctorRemarks", label: "Doctor's Remarks" },
         ],
       },
@@ -296,9 +320,14 @@ export function CategoryEditFormClient({
         id: "system_wise_examination",
         title: "Systemic Examination",
         fields: [
-          { id: "limpingGait", label: "Limping Gait" },
-          { id: "abdomenIssues", label: "Abdomen Issues" },
+          { id: "limpingGait", label: "Locomotor System: Limping Gait" },
+          { id: "abdomenIssues", label: "Abdomen: Issues" },
+          { id: "breathlessness", label: "Respiratory System: Breathlessness" },
+          { id: "cardioIssues", label: "Cardiovascular System: Issues" },
+          { id: "cnsIssues", label: "Central Nervous System: Issues" },
           { id: "presentComplaint", label: "Present Complaint" },
+          { id: "currentMedication", label: "Current Medication" },
+          { id: "otherInfo", label: "Other Information" },
           { id: "doctorRemarks", label: "Doctor's Remarks" },
         ],
       },
@@ -306,10 +335,15 @@ export function CategoryEditFormClient({
         id: "symptoms",
         title: "Clinical Presentation & Symptoms",
         fields: [
+          { id: "scratchesHead", label: "Scratches head frequently" },
           { id: "headache", label: "Complains of headache" },
           { id: "cannotSeeBoardSymptoms", label: "Cannot see board" },
+          { id: "pullsEars", label: "Pulls ears" },
+          { id: "nailBiting", label: "Nail biting" },
+          { id: "frequentUrination", label: "Frequent urination" },
           { id: "diarrhoea", label: "Diarrhoea" },
           { id: "vomiting", label: "Vomiting" },
+          { id: "stammering", label: "Stammering" },
           { id: "faintingEpisodes", label: "Fainting episodes" },
           { id: "anyOtherSymptoms", label: "Any other symptoms" },
         ],
@@ -319,9 +353,8 @@ export function CategoryEditFormClient({
     const currentCatDef = CATEGORIES_REF.find(c => c.id === category);
 
     if (currentCatDef) {
-      // Only render fields that are either required OR were explicitly defined in the config for this event
-      // However, to ensure visibility, we render all fields from the definition that match the config
-      const fieldsToRender = currentCatDef.fields.filter(f => requiredFields.includes(f.id));
+      // Show ALL fields defined for this category in the reference
+      const fieldsToRender = currentCatDef.fields;
 
       return (
         <div className="space-y-6">
