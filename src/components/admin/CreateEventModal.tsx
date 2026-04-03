@@ -24,6 +24,7 @@ export function CreateEventModal({
   const [error, setError] = useState<string | null>(null);
   const [minDate, setMinDate] = useState<string>("");
   const [eventDate, setEventDate] = useState("");
+  const [hasUserSelected, setHasUserSelected] = useState(false);
 
   useEffect(() => {
     const today = new Date();
@@ -35,6 +36,7 @@ export function CreateEventModal({
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setHasUserSelected(true);
     setError(null);
 
     const formData = new FormData(e.currentTarget);
@@ -91,10 +93,14 @@ export function CreateEventModal({
               required
               name="date"
               type="date"
-              className={`w-full p-2 border border-slate-200 rounded-md bg-white focus:text-slate-900 ${(eventDate === minDate && !isSubmitting) ? 'text-slate-400' : 'text-slate-900'}`}
+              className={`w-full p-2 border border-slate-200 rounded-md bg-white focus:text-slate-900 ${(!hasUserSelected && !isSubmitting) ? 'text-slate-400' : 'text-slate-900'}`}
               min={minDate}
               value={eventDate}
-              onChange={(e) => setEventDate(e.target.value)}
+              onFocus={() => setHasUserSelected(true)}
+              onChange={(e) => {
+                setEventDate(e.target.value);
+                setHasUserSelected(true);
+              }}
             />
           </div>
 
