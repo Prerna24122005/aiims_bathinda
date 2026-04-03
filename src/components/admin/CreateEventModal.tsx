@@ -145,7 +145,7 @@ export function CreateEventModal({
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting} className="bg-emerald-600 hover:bg-emerald-700">
+            <Button type="submit" disabled={isSubmitting} className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-100">
               {isSubmitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
               Create Event
             </Button>

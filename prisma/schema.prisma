@@ -24,8 +24,17 @@ enum Department {
   DENTAL
   OPHTHALMOLOGY
   DERMATOLOGY
-  GENERAL
   ENT
+  INTERNAL_MEDICINE
+  PEDIATRICS
+  OB_GYN
+  EMERGENCY_MEDICINE
+  NEUROLOGY
+  ORTHOPAEDICS
+  GASTROENTEROLOGY
+  PATHOLOGY
+  PSYCHIATRY
+  OTHER
 }
 
 enum RequestStatus {
@@ -144,4 +153,15 @@ model CategoryAuditLog {
   action          String        @default("SAVED") // SAVED, OVERRIDDEN
   medicalRecord   MedicalRecord @relation(fields: [medicalRecordId], references: [id])
   user            User          @relation(fields: [userId], references: [id])
+}
+
+model PasswordResetOtp {
+  id        String   @id @default(uuid())
+  email     String
+  otp       String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email, otp])
 }

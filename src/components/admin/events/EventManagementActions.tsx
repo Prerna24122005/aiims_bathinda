@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -26,11 +26,13 @@ export function EventManagementActions({
   const [isLoading, setIsLoading] = useState(false);
 
   const [newDate, setNewDate] = useState(new Date(currentDate).toISOString().split('T')[0]);
+  const [minDate, setMinDate] = useState<string>("");
 
-  // Helper to check if event is UPCOMING
-  const isUpcoming = status === "UPCOMING";
-
-  if (!isUpcoming) return null;
+  useEffect(() => {
+    const today = new Date();
+    const localDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    setMinDate(localDate);
+  }, []);
 
   async function handleCancel() {
     setIsLoading(true);
@@ -101,6 +103,7 @@ export function EventManagementActions({
                 type="date"
                 value={newDate}
                 onChange={(e) => setNewDate(e.target.value)}
+                min={minDate}
               />
             </div>
           </div>
@@ -133,6 +136,7 @@ export function EventManagementActions({
               variant="destructive"
               onClick={handleCancel}
               disabled={isLoading}
+              className="disabled:opacity-100"
             >
               {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Yes, Cancel Event

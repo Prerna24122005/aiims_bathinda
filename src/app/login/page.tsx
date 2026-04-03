@@ -60,16 +60,12 @@ export default function LoginPage() {
         <h2 className="text-center text-3xl font-extrabold text-slate-900 tracking-tight">
           Platform Login
         </h2>
-        <p className="mt-2 text-center text-sm text-slate-600">
-          Sign in to access your dashboard and active events.
-        </p>
       </div>
 
       <div className="sm:mx-auto sm:w-full sm:max-w-[28rem]">
         <Card className="border-t-4 border-t-emerald-600 shadow-xl shadow-emerald-900/5">
           <CardHeader>
             <CardTitle className="text-xl">Authentication Required</CardTitle>
-            <CardDescription>Enter your assigned credentials below.</CardDescription>
           </CardHeader>
           <CardContent>
             {error && (
@@ -121,6 +117,12 @@ export default function LoginPage() {
                     )}
                   </button>
                 </div>
+              </div>
+
+              <div className="flex justify-end">
+                <Link href="/forgot-password" className="text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors">
+                  Forgot Password?
+                </Link>
               </div>
 
               <div className="pt-2">

@@ -141,7 +141,7 @@ export function EventsTabClient({ events, actionButton }: { events: EventType[],
             return (
               <Link href={`/admin/events/${event.id}`} key={event.id} className="group">
                 <Card className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-2 sm:p-2 border border-slate-200 hover:border-emerald-300 hover:shadow-md transition-all duration-200 bg-white rounded-xl overflow-hidden relative">
-                  <div className={`absolute left-0 top-0 bottom-0 w-1 ${dynamicStatus.includes("ACTIVE") ? 'bg-emerald-500' : dynamicStatus === "PAST" ? 'bg-slate-300' : 'bg-blue-600'}`} />
+                  <div className={`absolute left-0 top-0 bottom-0 w-1 ${dynamicStatus.includes("ACTIVE") ? 'bg-emerald-500' : dynamicStatus === "PAST" ? 'bg-slate-300' : 'bg-blue-400'}`} />
 
                   <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 flex-1 pl-3 w-full">
                     <div className="min-w-[140px]">
@@ -149,7 +149,7 @@ export function EventsTabClient({ events, actionButton }: { events: EventType[],
                         ? 'bg-emerald-100 text-emerald-800 border-emerald-200 hover:bg-emerald-200'
                         : dynamicStatus === "PAST"
                           ? 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'
-                          : 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700'
+                          : 'bg-blue-400 text-white border-blue-500 hover:bg-blue-500'
                         }`}>
                         {dynamicStatus}
                       </Badge>
@@ -175,7 +175,7 @@ export function EventsTabClient({ events, actionButton }: { events: EventType[],
                     </div>
 
                     <div className="flex items-center gap-4">
-                      {dynamicStatus === "UPCOMING" && (
+                      {(dynamicStatus === "UPCOMING" || dynamicStatus.includes("ACTIVE")) && (
                         <EventManagementActions
                           eventId={event.id}
                           currentDate={event.eventDate}

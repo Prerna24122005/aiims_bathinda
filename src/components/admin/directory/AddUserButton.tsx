@@ -11,7 +11,16 @@ const DEPARTMENTS = [
   { value: "OPHTHALMOLOGY", label: "Ophthalmology" },
   { value: "DERMATOLOGY", label: "Dermatology" },
   { value: "ENT", label: "ENT" },
-  { value: "GENERAL", label: "General" },
+  { value: "INTERNAL_MEDICINE", label: "Internal Medicine" },
+  { value: "PEDIATRICS", label: "Pediatrics" },
+  { value: "OB_GYN", label: "OB/GYN" },
+  { value: "EMERGENCY_MEDICINE", label: "Emergency Medicine" },
+  { value: "NEUROLOGY", label: "Neurology" },
+  { value: "ORTHOPAEDICS", label: "Orthopaedics" },
+  { value: "GASTROENTEROLOGY", label: "Gastroenterology" },
+  { value: "PATHOLOGY", label: "Pathology" },
+  { value: "PSYCHIATRY", label: "Psychiatry" },
+  { value: "OTHER", label: "Other" },
 ];
 
 export function AddUserButton() {
@@ -50,9 +59,8 @@ export function AddUserButton() {
     const formData = new FormData(e.currentTarget);
     const fullName = formData.get("fullName") as string;
     const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
 
-    const res = await addMedicalStaff(fullName, email, password, selectedDept);
+    const res = await addMedicalStaff(fullName, email, selectedDept);
 
     if (res.success) {
       setIsOpen(false);
@@ -73,7 +81,6 @@ export function AddUserButton() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={(e) => { if (e.target === e.currentTarget) setIsOpen(false); }}>
           <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
             <h3 className="text-xl font-bold text-gray-900 mb-1">Add Medical Staff</h3>
-            <p className="text-sm text-gray-500 mb-6">Create a new account for a doctor or nurse.</p>
 
             {error && <div className="p-3 mb-4 text-sm text-red-700 bg-red-50 rounded-lg">{error}</div>}
 
@@ -86,12 +93,6 @@ export function AddUserButton() {
               <div className="space-y-1">
                 <label className="text-sm font-medium text-slate-700">Email Address</label>
                 <input required name="email" type="email" className="w-full p-2 border rounded-md" />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-sm font-medium text-slate-700">Temporary Password</label>
-                <input required name="password" type="password" className="w-full p-2 border rounded-md" minLength={6} />
-                <p className="text-xs text-slate-400 mt-1">Minimum 6 characters.</p>
               </div>
 
               <div className="space-y-1" ref={deptRef}>

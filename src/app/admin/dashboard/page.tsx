@@ -14,6 +14,7 @@ import { EventsTabClient } from "@/components/admin/EventsTabClient";
 import { CreateEventButton } from "@/components/admin/CreateEventButton";
 import { StaffDirectoryClient } from "@/components/admin/directory/StaffDirectoryClient";
 import { RealTimeRefresher } from "@/components/shared/RealTimeRefresher";
+import { AdminChangePasswordButton } from "@/components/admin/AdminChangePasswordButton";
 
 export default async function AdminDashboard() {
   const session = await getServerSession(authOptions);
@@ -80,6 +81,10 @@ export default async function AdminDashboard() {
                 <Users className="h-5 w-5 shrink-0" /> <span className="truncate">Directory</span>
               </TabsTrigger>
             </TabsList>
+
+            <div className="mt-auto px-6 pt-4 border-t border-slate-100 hidden md:block">
+              <AdminChangePasswordButton />
+            </div>
           </div>
         </aside>
 

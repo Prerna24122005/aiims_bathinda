@@ -2,10 +2,22 @@
 
 import { prisma } from "@/lib/db/prisma";
 import { revalidatePath } from "next/cache";
-import { sendRequestAcceptedEmail, sendRequestRejectedEmail, sendEventCanceledEmail, sendManualEventCreatedEmail } from "@/lib/email";
+import { sendRequestAcceptedEmail, sendRequestRejectedEmail, sendEventCanceledEmail, sendManualEventCreatedEmail, sendStaffAccountCreatedEmail } from "@/lib/email";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import bcryptjs from "bcryptjs";
+import crypto from "crypto";
+
+// Generate a random 8-character ASCII password
+function generateRandomPassword(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&*';
+  let password = '';
+  const bytes = crypto.randomBytes(8);
+  for (let i = 0; i < 8; i++) {
+    password += chars[bytes[i] % chars.length];
+  }
+  return password;
+}
 
 // All form fields — every new event starts with all of them as compulsory
 const DEFAULT_FORM_CONFIG = {
@@ -90,8 +102,9 @@ export async function acceptCampRequest(
       throw new Error("Request not found");
     }
 
-    // Pre-hash password outside transaction for performance
-    const pocPasswordHash = await bcryptjs.hash("School@123", 10);
+    // Generate random password and hash it
+    const pocPassword = generateRandomPassword();
+    const pocPasswordHash = await bcryptjs.hash(pocPassword, 10);
 
     let newEventId = "";
     // 2. Create Event and Assign Staff in a single transaction
@@ -145,7 +158,7 @@ export async function acceptCampRequest(
 
     // Send Acceptance Email (safely bound to prevent UI silent-failures if SMTP is down)
     try {
-      await sendRequestAcceptedEmail(request.pocEmail, request.pocName, request.schoolName, request.tentativeDate);
+      await sendRequestAcceptedEmail(request.pocEmail, request.pocName, request.schoolName, request.tentativeDate, pocPassword);
     } catch (e) {
       console.error("Non-fatal: Email dispatch failed after acceptance.", e);
     }
@@ -186,8 +199,9 @@ export async function createEvent(
 
     const adminUserId = adminUser.id;
 
-    // Pre-hash password outside transaction
-    const pocPasswordHash = await bcryptjs.hash("School@123", 10);
+    // Generate random password and hash it
+    const pocPassword = generateRandomPassword();
+    const pocPasswordHash = await bcryptjs.hash(pocPassword, 10);
 
     await prisma.$transaction(async (tx) => {
       const newEvent = await tx.event.create({
@@ -231,7 +245,7 @@ export async function createEvent(
 
     // Send Manual Event Creation Email
     try {
-      await sendManualEventCreatedEmail(data.pocEmail, data.pocName, data.schoolDetails, data.eventDate);
+      await sendManualEventCreatedEmail(data.pocEmail, data.pocName, data.schoolDetails, data.eventDate, pocPassword);
     } catch (e) {
       console.error("Non-fatal: Email dispatch failed after manual event creation.", e);
     }
@@ -248,7 +262,6 @@ export async function createEvent(
 export async function addMedicalStaff(
   fullName: string,
   email: string,
-  rawPassword: string,
   department: string | null = null
 ) {
   try {
@@ -263,8 +276,9 @@ export async function addMedicalStaff(
       return { success: false, error: "Email already registered" };
     }
 
-    // 2. Hash password and insert
-    const passwordHash = await bcryptjs.hash(rawPassword, 10);
+    // 2. Generate random password, hash and insert
+    const randomPassword = generateRandomPassword();
+    const passwordHash = await bcryptjs.hash(randomPassword, 10);
 
     await prisma.user.create({
       data: {
@@ -275,6 +289,13 @@ export async function addMedicalStaff(
         department: department as any
       }
     });
+
+    // 3. Send welcome email with credentials
+    try {
+      await sendStaffAccountCreatedEmail(email, fullName, randomPassword);
+    } catch (e) {
+      console.error("Non-fatal: Email dispatch failed after staff creation.", e);
+    }
 
     revalidatePath("/admin/dashboard");
     return { success: true };
