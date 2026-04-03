@@ -218,12 +218,10 @@ export function EventFormConfigBuilder({
   const selectDefaults = () => {
     const defaults = { ...DEFAULT_NECESSARY_FIELDS };
     customSections.forEach(c => {
-      defaults[c.id] = []; 
+      defaults[c.id] = [];
     });
     setConfig(defaults);
   };
-
-  const clearAll = () => setConfig({});
 
   const toggleField = (categoryId: string, fieldId: string, checked: boolean) => {
     setConfig(prev => {
@@ -330,7 +328,6 @@ export function EventFormConfigBuilder({
         <div className="flex gap-2">
           <Button variant="outline" onClick={selectDefaults}>Restore Defaults</Button>
           <Button variant="outline" onClick={selectAll}>Select All</Button>
-          <Button variant="outline" onClick={clearAll}>Clear All</Button>
           <Button onClick={handleSave} disabled={isSaving}>
             {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
             Save Builder Settings
