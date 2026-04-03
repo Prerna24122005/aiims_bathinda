@@ -107,7 +107,7 @@ export async function acceptCampRequest(
     const pocPasswordHash = await bcryptjs.hash(pocPassword, 10);
 
     let newEventId = "";
-    // 2. Create Event and Assign Staff in a single transaction
+    // 2. Create Event and Assign Staff in a single transaction with a longer timeout (15s)
     await prisma.$transaction(async (tx) => {
       // 1. Create the Event
       const newEvent = await tx.event.create({
@@ -119,7 +119,10 @@ export async function acceptCampRequest(
           pocPhone: request.pocPhone,
           status: "UPCOMING",
           createdBy: adminUserId,
-          formConfig: { ...(DEFAULT_FORM_CONFIG as any) }
+          formConfig: {
+            ...(DEFAULT_FORM_CONFIG as any),
+            eventHeadId: (staffIds && staffIds.length > 0) ? staffIds[0] : null
+          }
         } as any
       });
       newEventId = newEvent.id;
@@ -140,20 +143,24 @@ export async function acceptCampRequest(
         });
       }
 
-      // 3. Assign Staff (including POC) to the Event
-      const finalStaffIds = Array.from(new Set([...(staffIds || []), pocUser.id]));
-      await tx.eventStaff.createMany({
-        data: finalStaffIds.map(userId => ({
-          eventId: newEventId,
-          userId: userId
-        }))
-      });
+      // 3. Assign Staff to the Event (only if any are selected)
+      const finalStaffIds = Array.from(new Set(staffIds || []));
+      if (finalStaffIds.length > 0) {
+        await tx.eventStaff.createMany({
+          data: finalStaffIds.map(userId => ({
+            eventId: newEventId,
+            userId: userId
+          }))
+        });
+      }
 
       // 4. Mark Request as Accepted
       await tx.healthCampRequest.update({
         where: { id: requestId },
         data: { status: "ACCEPTED" }
       });
+    }, {
+      timeout: 15000 // 15 seconds to prevent "Transaction not found" on slow DB/network
     });
 
     // Send Acceptance Email (safely bound to prevent UI silent-failures if SMTP is down)
@@ -213,7 +220,10 @@ export async function createEvent(
           pocPhone: data.pocPhone,
           status: "UPCOMING",
           createdBy: adminUserId,
-          formConfig: { ...DEFAULT_FORM_CONFIG }
+          formConfig: {
+            ...DEFAULT_FORM_CONFIG,
+            eventHeadId: (data.staffIds && data.staffIds.length > 0) ? data.staffIds[0] : null
+          }
         } as any
       });
 
@@ -442,13 +452,28 @@ export async function setEventHead(eventId: string, userId: string) {
     const currentConfig = (event.formConfig as any) || {};
     currentConfig.eventHeadId = userId;
 
-    await prisma.event.update({
-      where: { id: eventId },
-      data: { formConfig: currentConfig }
-    });
+    await prisma.$transaction([
+      prisma.event.update({
+        where: { id: eventId },
+        data: { formConfig: currentConfig }
+      }),
+      // Also ensure this user is assigned to the event so they can access it
+      prisma.eventStaff.upsert({
+        where: {
+          eventId_userId: {
+            eventId,
+            userId
+          }
+        },
+        create: {
+          eventId,
+          userId
+        },
+        update: {} // No change if already assigned
+      })
+    ]);
 
     revalidatePath(`/admin/events/${eventId}`);
-    revalidatePath(`/staff/workspace/${eventId}`);
     return { success: true };
   } catch (error) {
     console.error(error);

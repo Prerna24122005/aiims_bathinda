@@ -23,11 +23,13 @@ export function CreateEventModal({
   const [selectedStaff, setSelectedStaff] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [minDate, setMinDate] = useState<string>("");
+  const [eventDate, setEventDate] = useState("");
 
   useEffect(() => {
     const today = new Date();
     const localDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     setMinDate(localDate);
+    setEventDate(localDate);
   }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -58,10 +60,17 @@ export function CreateEventModal({
   };
 
   const toggleStaffSelection = (id: string) => {
-    setSelectedStaff((prev) =>
-      prev.includes(id) ? prev.filter((sId) => sId !== id) : [...prev, id]
-    );
+    setSelectedStaff((prev) => (prev.includes(id) ? [] : [id]));
   };
+
+  const [staffSearch, setStaffSearch] = useState("");
+
+  const filteredStaff = medicalStaff.filter((s) => {
+    if (!staffSearch) return true;
+    const q = staffSearch.toLowerCase();
+    const dept = s.department?.replace("_", " ") || "";
+    return s.fullName.toLowerCase().includes(q) || dept.toLowerCase().includes(q);
+  });
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={onClose}>
@@ -82,8 +91,10 @@ export function CreateEventModal({
               required
               name="date"
               type="date"
-              className="w-full p-2 border rounded-md"
+              className={`w-full p-2 border border-slate-200 rounded-md bg-white focus:text-slate-900 ${(eventDate === minDate && !isSubmitting) ? 'text-slate-400' : 'text-slate-900'}`}
               min={minDate}
+              value={eventDate}
+              onChange={(e) => setEventDate(e.target.value)}
             />
           </div>
 
@@ -114,31 +125,56 @@ export function CreateEventModal({
             />
           </div>
 
-          <div className="pt-2">
-            <h4 className="font-medium text-slate-900 mb-2">Assign Medical Staff</h4>
-            <div className="space-y-2 border rounded-md p-3 max-h-48 overflow-y-auto">
-              {medicalStaff.map((staff) => (
-                <label key={staff.id} className="flex items-center space-x-3 cursor-pointer p-2 hover:bg-slate-50 rounded">
+          <div>
+            <h4 className="font-medium text-slate-900 mb-1">Assign Event Head</h4>
+            <p className="text-xs text-slate-400 mb-2">Optional — select one staff member to lead this event.</p>
+            {(!medicalStaff || medicalStaff.length === 0) ? (
+              <p className="text-sm text-red-500">No medical staff available.</p>
+            ) : (
+              <div className="border rounded-md overflow-hidden bg-white">
+                <div className="p-2 border-b border-slate-100">
                   <input
-                    type="checkbox"
-                    className="w-4 h-4 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500"
-                    checked={selectedStaff.includes(staff.id)}
-                    onChange={() => toggleStaffSelection(staff.id)}
+                    type="text"
+                    placeholder="Search by name or department..."
+                    className="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+                    value={staffSearch}
+                    onChange={(e) => setStaffSearch(e.target.value)}
                   />
-                  <div className="flex-1 flex justify-between items-center">
-                    <div>
-                      <p className="font-medium text-sm text-slate-900">{staff.fullName}</p>
-                      <p className="text-xs text-slate-500">{staff.email}</p>
-                    </div>
-                    {staff.department && (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider bg-slate-100 text-slate-600 uppercase border border-slate-200">
-                        {staff.department.replace("_", " ")}
-                      </span>
-                    )}
-                  </div>
-                </label>
-              ))}
-            </div>
+                </div>
+                <div className="space-y-1 p-2 max-h-48 overflow-y-auto bg-slate-50/10">
+                  {filteredStaff.length === 0 ? (
+                    <div className="p-4 text-center text-xs text-slate-500">No staff found</div>
+                  ) : (
+                    filteredStaff.map((staff) => (
+                      <label
+                        key={staff.id}
+                        className={`flex items-center justify-between cursor-pointer p-2 rounded border transition-all ${selectedStaff.includes(staff.id) ? 'bg-emerald-50 border-emerald-100' : 'bg-white border-transparent hover:bg-slate-50'}`}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <input
+                            type="radio"
+                            name="eventHeadManual"
+                            className="w-4 h-4 text-emerald-600 border-gray-300 focus:ring-emerald-500"
+                            checked={selectedStaff.includes(staff.id)}
+                            onClick={() => toggleStaffSelection(staff.id)}
+                            readOnly
+                          />
+                          <div className="flex flex-col">
+                            <span className="text-sm font-semibold text-gray-900 leading-tight">{staff.fullName}</span>
+                            <span className="text-[10px] text-gray-500 font-medium">{staff.email}</span>
+                          </div>
+                        </div>
+                        {staff.department && (
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-white text-slate-600 uppercase border border-slate-200 shadow-sm">
+                            {staff.department.replace("_", " ")}
+                          </span>
+                        )}
+                      </label>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t mt-4">

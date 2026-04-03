@@ -22,6 +22,7 @@ type StaffType = {
   id: string;
   fullName: string;
   email: string;
+  department?: string | null;
 };
 
 export function RequestsTabClient({
@@ -41,6 +42,7 @@ export function RequestsTabClient({
   const [isAccepting, setIsAccepting] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [staffSearch, setStaffSearch] = useState("");
 
   const handleReject = async () => {
     if (!rejectId || !rejectReason.trim()) return;
@@ -75,7 +77,7 @@ export function RequestsTabClient({
 
   const toggleStaffSelection = (id: string) => {
     setSelectedStaff((prev) =>
-      prev.includes(id) ? prev.filter((sId) => sId !== id) : [...prev, id]
+      prev.includes(id) ? [] : [id]
     );
   };
 
@@ -125,27 +127,33 @@ export function RequestsTabClient({
         <div className="grid gap-2">
           {filteredRequests.map((req) => (
             <Card key={req.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-2.5 bg-white shrink-0 shadow-sm transition-all hover:shadow-md border border-slate-100 hover:border-emerald-100 group">
-            <div className="space-y-0.5 mb-3 sm:mb-0 text-left">
-              <h3 className="font-bold text-lg text-slate-900 leading-tight">{req.schoolName}</h3>
-              <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-slate-500 font-medium">
-                <span>Date: {req.tentativeDate ? new Date(req.tentativeDate).toLocaleDateString() : 'N/A'}</span>
-                <span>Students: ~{req.tentativeStudents || 0}</span>
-                <span>POC: {req.pocName}</span>
+              <div className="space-y-0.5 mb-3 sm:mb-0 text-left">
+                <h3 className="font-bold text-lg text-slate-900 leading-tight">{req.schoolName}</h3>
+                <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-slate-500 font-medium">
+                  <span>Date: {req.tentativeDate ? new Date(req.tentativeDate).toLocaleDateString() : 'N/A'}</span>
+                  <span>Students: ~{req.tentativeStudents || 0}</span>
+                  <span>POC: {req.pocName}</span>
+                </div>
               </div>
-            </div>
-            <div className="flex gap-2 w-full sm:w-auto shrink-0">
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1 sm:flex-none h-9 px-4 border-red-100 text-red-600 hover:bg-red-50 text-sm font-bold"
+              <div className="flex gap-2 w-full sm:w-auto shrink-0">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 sm:flex-none h-9 px-4 border-red-100 text-red-600 hover:bg-red-50 text-sm font-bold"
                   onClick={() => setRejectId(req.id)}
                 >
                   Reject
                 </Button>
                 <Button
                   size="sm"
-                  className="flex-1 sm:flex-none h-9 px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold shadow-sm"
-                  onClick={() => setAcceptRequest(req)}
+                  className={`flex-1 sm:flex-none h-9 px-4 text-sm font-bold shadow-sm ${req.tentativeDate && new Date(req.tentativeDate) < new Date(new Date().setHours(0, 0, 0, 0)) ? 'bg-slate-300 text-slate-500 cursor-not-allowed hover:bg-slate-300' : 'bg-emerald-600 hover:bg-emerald-700 text-white'}`}
+                  onClick={() => {
+                    if (req.tentativeDate && new Date(req.tentativeDate) < new Date(new Date().setHours(0, 0, 0, 0))) {
+                      alert("Date has passed. You can only reject this request.");
+                    } else {
+                      setAcceptRequest(req);
+                    }
+                  }}
                 >
                   Accept & Create
                 </Button>
@@ -173,8 +181,9 @@ export function RequestsTabClient({
               <Button variant="outline" onClick={() => setRejectId(null)}>
                 Cancel
               </Button>
-              <Button onClick={handleReject} disabled={isRejecting || !rejectReason.trim()} className="bg-red-600 hover:bg-red-700">
-                {isRejecting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Confirm Rejection"}
+              <Button onClick={handleReject} disabled={isRejecting || !rejectReason.trim()} className="bg-red-600 hover:bg-red-700 disabled:opacity-100">
+                {isRejecting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+                Confirm Rejection
               </Button>
             </div>
           </div>
@@ -212,25 +221,53 @@ export function RequestsTabClient({
               </div>
 
               <div>
-                <h4 className="font-medium text-slate-900 mb-2">Assign Medical Staff</h4>
+                <h4 className="font-medium text-slate-900 mb-1">Assign Event Head</h4>
+                <p className="text-xs text-slate-400 mb-2">Optional — select one staff member to lead this event.</p>
                 {(!medicalStaff || medicalStaff.length === 0) ? (
                   <p className="text-sm text-red-500">No medical staff available. Create some in the directory first.</p>
                 ) : (
-                  <div className="space-y-2 border rounded-md p-3 max-h-48 overflow-y-auto">
-                    {medicalStaff.map((staff) => (
-                      <label key={staff.id} className="flex items-center space-x-3 cursor-pointer p-2 hover:bg-slate-50 rounded">
-                        <input
-                          type="checkbox"
-                          className="w-4 h-4 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500"
-                          checked={selectedStaff.includes(staff.id)}
-                          onChange={() => toggleStaffSelection(staff.id)}
-                        />
-                        <div className="flex flex-col">
-                          <span className="text-sm font-medium text-gray-900">{staff.fullName}</span>
-                          <span className="text-xs text-gray-500">{staff.email}</span>
-                        </div>
-                      </label>
-                    ))}
+                  <div className="border rounded-md overflow-hidden">
+                    <div className="p-2 border-b border-slate-100">
+                      <input
+                        type="text"
+                        placeholder="Search by name or department..."
+                        className="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+                        value={staffSearch}
+                        onChange={(e) => setStaffSearch(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-1 p-3 max-h-48 overflow-y-auto">
+                      {medicalStaff
+                        .filter((s) => {
+                          if (!staffSearch) return true;
+                          const q = staffSearch.toLowerCase();
+                          const dept = s.department?.replace("_", " ") || "";
+                          return s.fullName.toLowerCase().includes(q) || dept.toLowerCase().includes(q);
+                        })
+                        .map((staff) => (
+                          <label key={staff.id} className="flex items-center justify-between cursor-pointer p-2 hover:bg-slate-50 rounded">
+                            <div className="flex items-center space-x-3">
+                              <input
+                                type="radio"
+                                name="eventHead"
+                                className="w-4 h-4 text-emerald-600 border-gray-300 focus:ring-emerald-500"
+                                checked={selectedStaff.includes(staff.id)}
+                                onClick={() => toggleStaffSelection(staff.id)}
+                                readOnly
+                              />
+                              <div className="flex flex-col">
+                                <span className="text-sm font-medium text-gray-900">{staff.fullName}</span>
+                                <span className="text-xs text-gray-500">{staff.email}</span>
+                              </div>
+                            </div>
+                            {staff.department && (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider bg-slate-100 text-slate-600 uppercase border border-slate-200">
+                                {staff.department.replace("_", " ")}
+                              </span>
+                            )}
+                          </label>
+                        ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -240,7 +277,7 @@ export function RequestsTabClient({
               <Button variant="outline" onClick={() => setAcceptRequest(null)}>
                 Cancel
               </Button>
-              <Button onClick={handleAccept} disabled={isAccepting} className="bg-emerald-600 hover:bg-emerald-700">
+              <Button onClick={handleAccept} disabled={isAccepting} className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-100">
                 {isAccepting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
                 Approve & Create
               </Button>

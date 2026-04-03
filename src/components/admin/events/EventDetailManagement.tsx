@@ -135,7 +135,7 @@ export function EventDetailManagement({
                     />
                     <SetEventHeadButton
                       eventId={event.id}
-                      assignedStaff={event.eventStaff.map((s: any) => s.user)}
+                      medicalStaff={allMedicalStaff}
                     />
                   </div>
                 </div>
