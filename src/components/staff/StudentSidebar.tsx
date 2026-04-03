@@ -8,6 +8,9 @@ import Link from "next/link";
 import { usePathname, useSearchParams, useParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 
+import { useSession } from "next-auth/react";
+import { getStudentNavigationUrl } from "@/lib/utils/navigation";
+
 type StudentData = {
   id: string;
   firstName: string;
@@ -19,15 +22,20 @@ type StudentData = {
 interface StudentSidebarProps {
   students: StudentData[];
   eventId: string;
+  formConfig?: any;
+  currentUserId?: string;
 }
 
-export function StudentSidebar({ students, eventId }: StudentSidebarProps) {
+export function StudentSidebar({ students, eventId, formConfig, currentUserId }: StudentSidebarProps) {
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.role === "ADMIN";
   const params = useParams();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   
   const currentStudentId = params?.studentId as string;
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
 
   const isReferredView = pathname.includes("/referred") || searchParams.get("from") === "referred";
   const isObservationView = pathname.includes("/observation") || searchParams.get("from") === "observation";
@@ -44,27 +52,54 @@ export function StudentSidebar({ students, eventId }: StudentSidebarProps) {
 
   const filteredStudents = baseList.filter((s) => {
     const q = search.toLowerCase();
-    return (
+    const matchesSearch = (
       s.firstName.toLowerCase().includes(q) ||
       s.lastName.toLowerCase().includes(q) ||
       s.classSec.toLowerCase().includes(q)
     );
+    if (!matchesSearch) return false;
+
+    if (statusFilter === "ALL") return true;
+    const sStatus = s.medicalRecord?.status || "PENDING";
+    return sStatus === statusFilter;
   });
 
   return (
     <div className="w-80 border-r bg-white flex flex-col h-[calc(100vh-64px)] sticky top-16 hidden lg:flex">
       <div className="p-4 border-b space-y-4 shadow-sm bg-white/50 backdrop-blur-sm z-10">
-        <div className="flex items-center justify-between">
-          <h2 className="font-extrabold text-lg text-slate-900 tracking-tight">
-            {isReferredView ? "Review List" : isObservationView ? "Observation List" : "Student Roster"}
-          </h2>
-          <Badge variant="secondary" className={cn(
-            "border-none font-bold",
-            isReferredView ? "bg-red-100 text-red-600" : isObservationView ? "bg-amber-100 text-amber-600" : "bg-slate-100 text-slate-600"
-          )}>
-            {baseList.length}
-          </Badge>
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <h2 className="font-extrabold text-lg text-slate-900 tracking-tight">
+              {isReferredView ? "Review List" : isObservationView ? "Observation List" : "Student Roster"}
+            </h2>
+            <div className="text-[11px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+              {filteredStudents.length} / {baseList.length}
+            </div>
+          </div>
+          
+          <div className="flex bg-slate-100 p-0.5 rounded-lg w-full">
+            {[
+              { id: "ALL", label: "All" },
+              { id: "PENDING", label: "Pend" },
+              { id: "IN_PROGRESS", label: "Prog" },
+              { id: "COMPLETED", label: "Done" }
+            ].map((f) => (
+              <button
+                key={f.id}
+                onClick={() => setStatusFilter(f.id)}
+                className={cn(
+                  "flex-1 px-1 py-1.5 text-[10px] font-black rounded-md transition-all uppercase tracking-tight",
+                  statusFilter === f.id
+                    ? "bg-white text-emerald-600 shadow-sm"
+                    : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+                )}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
         </div>
+
         <div className="relative group">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-emerald-500 transition-colors" />
           <Input
@@ -85,10 +120,13 @@ export function StudentSidebar({ students, eventId }: StudentSidebarProps) {
               const isReferred = Object.values(student.medicalRecord?.data || {}).some((catData: any) => catData?.status_nor === "R");
               const isObservation = Object.values(student.medicalRecord?.data || {}).some((catData: any) => catData?.status_nor === "O");
 
+              const navUrl = getStudentNavigationUrl(student.id, eventId, currentUserId || "", formConfig, isAdmin || false, isReferredView);
+              const queryString = isReferredView ? '?from=referred' : isObservationView ? '?from=observation' : '';
+
               return (
                 <Link
                   key={student.id}
-                  href={`/staff/workspace/${eventId}/student/${student.id}${isReferredView ? '?from=referred' : isObservationView ? '?from=observation' : ''}`}
+                  href={`${navUrl}${queryString}`}
                   className={cn(
                     "flex flex-col px-4 py-3.5 transition-all relative group",
                     isActive 
@@ -106,12 +144,6 @@ export function StudentSidebar({ students, eventId }: StudentSidebarProps) {
                       {student.firstName} {student.lastName}
                     </span>
                     <div className="flex items-center gap-1.5">
-                      {isReferred && !isReferredView && !isObservationView && (
-                        <div className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" title="Referred" />
-                      )}
-                      {isObservation && !isObservationView && !isReferredView && (
-                        <div className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" title="Observation" />
-                      )}
                       <Badge 
                         variant="outline" 
                         className={cn(

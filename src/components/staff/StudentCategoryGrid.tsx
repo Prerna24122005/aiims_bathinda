@@ -113,6 +113,14 @@ export function StudentCategoryGrid({
                   </Badge>
                 )}
               </div>
+              {cat.lastEditedBy && (
+                <div className="text-[10px] text-slate-500 mt-1">
+                  <span className="font-semibold uppercase tracking-wider">Saved By:</span>{" "}
+                  {/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cat.lastEditedBy)
+                    ? "Staff Member"
+                    : cat.lastEditedBy}
+                </div>
+              )}
             </div>
           </div>
 

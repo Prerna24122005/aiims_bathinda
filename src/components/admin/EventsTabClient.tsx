@@ -163,13 +163,13 @@ export function EventsTabClient({ events, actionButton }: { events: EventType[],
                         {event.schoolDetails}
                       </h3>
                       <div className="flex flex-wrap gap-x-4 gap-y-1 mt-0.5 font-medium uppercase tracking-tighter text-[11px]">
-                        <div className="flex items-center gap-1 text-slate-500">
-                          <span className="text-emerald-600">POC:</span>
-                          <span className="text-slate-700 truncate max-w-[120px]">{event.pocName}</span>
+                        <div className="flex items-baseline gap-1 text-slate-500 text-[10px]">
+                          <span className="text-emerald-600 font-bold uppercase tracking-tight">POC:</span>
+                          <span className="text-slate-700 truncate max-w-[120px] font-medium text-[11px]">{event.pocName}</span>
                         </div>
-                        <div className="flex items-center gap-1 text-slate-500">
-                          <span className="text-amber-600">Head:</span>
-                          <span className="text-slate-700 truncate max-w-[120px]">{event.eventHeadName}</span>
+                        <div className="flex items-baseline gap-1 text-slate-500 text-[10px]">
+                          <span className="text-amber-600 font-bold uppercase tracking-tight">Head:</span>
+                          <span className="text-slate-700 truncate max-w-[120px] font-medium text-[11px]">{event.eventHeadName}</span>
                         </div>
                       </div>
                     </div>
@@ -254,9 +254,9 @@ export function EventsTabClient({ events, actionButton }: { events: EventType[],
                                 {event.schoolDetails}
                               </h3>
                               <div className="flex flex-wrap gap-x-4 gap-y-1 mt-0.5 font-medium uppercase tracking-tighter text-[11px]">
-                                <div className="flex items-center gap-1 text-slate-400">
-                                  <span className="text-slate-500">POC:</span>
-                                  <span className="text-slate-600 truncate max-w-[120px]">{event.pocName}</span>
+                                <div className="flex items-baseline gap-1 text-slate-400 text-[10px]">
+                                  <span className="text-slate-500 font-bold uppercase tracking-tight">POC:</span>
+                                  <span className="text-slate-600 truncate max-w-[120px] font-medium text-[11px]">{event.pocName}</span>
                                 </div>
                               </div>
                             </div>

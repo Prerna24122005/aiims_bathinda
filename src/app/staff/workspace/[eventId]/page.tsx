@@ -15,7 +15,7 @@ export default async function EventWorkspace({ params }: { params: Promise<{ eve
       eventStaff: {
         select: {
           user: {
-            select: { id: true, fullName: true, email: true }
+            select: { id: true, fullName: true, email: true, department: true }
           }
         }
       },
@@ -32,18 +32,27 @@ export default async function EventWorkspace({ params }: { params: Promise<{ eve
 
   if (!event) return notFound();
 
+  // Resolve event head info
+  const eventHeadId = (event.formConfig as any)?.eventHeadId;
+  const eventHeadUser = event.eventStaff.find((s: any) => s.user.id === eventHeadId)?.user;
+
   return (
     <div className="flex flex-col">
       <WorkspaceClient
         eventId={event.id}
         schoolName={event.schoolDetails}
         eventDate={event.eventDate}
-        location="Main Campus" // Fallback since it's not in schema currently
+        location="Main Campus"
         students={event.students}
         eventStaff={event.eventStaff.map((s: any) => s.user)}
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         formConfig={event.formConfig as any}
         currentUserId={session?.user?.id || ""}
+        pocName={event.pocName}
+        pocPhone={event.pocPhone}
+        pocEmail={event.pocEmail}
+        eventHeadName={eventHeadUser?.fullName || null}
+        eventHeadDepartment={eventHeadUser?.department || null}
       />
     </div>
   );

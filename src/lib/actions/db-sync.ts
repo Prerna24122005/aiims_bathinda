@@ -147,7 +147,10 @@ export async function saveMedicalCategory(
           return val !== undefined && val !== null && val !== "" && val !== false;
         });
 
-        if (requiredFields.length === 0 || hasAllRequired) {
+        // A category is COMPLETED if all required fields are filled AND (it's demographics OR has status_nor)
+        const isAssessmentComplete = catId === "demographics" || !!dataForCat.status_nor;
+
+        if ((requiredFields.length === 0 || hasAllRequired) && isAssessmentComplete) {
           completedCount++;
         }
       }

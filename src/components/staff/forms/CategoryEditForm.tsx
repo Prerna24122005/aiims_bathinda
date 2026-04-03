@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { saveMedicalCategory } from "@/lib/actions/db-sync";
 import { acquireLock, releaseLock } from "@/lib/actions/locks";
 import { useRouter } from "next/navigation";
@@ -35,14 +35,12 @@ export function CategoryEditFormClient({
   eventId: string,
   studentId: string,
   category: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   initialData: Record<string, any>,
   requiredFields?: string[],
   isReadOnly?: boolean,
   readOnlyReason?: string,
   userName?: string,
   userId: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   customCategoryBlock?: any,
   student?: any,
   isPOC?: boolean,
@@ -54,15 +52,47 @@ export function CategoryEditFormClient({
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLockedBy, setIsLockedBy] = useState<string | null>(null);
+  const [hasTimedOut, setHasTimedOut] = useState(false);
+  const lastActivityTime = useRef(Date.now());
 
   // Form State - Initialize with initialData or empty defaults
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [formData, setFormData] = useState<Record<string, any>>(initialData || {});
 
+  // Track user activity
   useEffect(() => {
-    if (isReadOnly) return; // Don't try to lock past events
+    if (isReadOnly || hasTimedOut) return;
+
+    const updateActivity = () => {
+      lastActivityTime.current = Date.now();
+    };
+
+    window.addEventListener("mousemove", updateActivity);
+    window.addEventListener("keydown", updateActivity);
+    window.addEventListener("click", updateActivity);
+    window.addEventListener("scroll", updateActivity);
+
+    // Release lock if browser tab/window is closed
+    const handleBeforeUnload = () => {
+      if (!hasTimedOut) {
+        releaseLock(studentId, eventId, category, userId);
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("mousemove", updateActivity);
+      window.removeEventListener("keydown", updateActivity);
+      window.removeEventListener("click", updateActivity);
+      window.removeEventListener("scroll", updateActivity);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [isReadOnly, hasTimedOut, studentId, eventId, category, userId]);
+
+  useEffect(() => {
+    if (isReadOnly || hasTimedOut) return; // Don't try to lock past events or timed out sessions
 
     let intervalId: NodeJS.Timeout;
+    let lockAcquired = false;
 
     const setupLock = async () => {
       const result = await acquireLock(studentId, eventId, category, userId, userName);
@@ -70,10 +100,19 @@ export function CategoryEditFormClient({
         setIsLockedBy(result.lockedBy);
       } else if (result.success) {
         setIsLockedBy(null);
-        // Keep lock alive every 3 minutes
+        lockAcquired = true;
+        // Keep lock alive every 1 minute to allow responsive timeout checking
         intervalId = setInterval(() => {
-          acquireLock(studentId, eventId, category, userId, userName);
-        }, 3 * 60 * 1000);
+          if (Date.now() - lastActivityTime.current > 5 * 60 * 1000) {
+            releaseLock(studentId, eventId, category, userId);
+            setHasTimedOut(true);
+            setIsLockedBy(null);
+            lockAcquired = false;
+            clearInterval(intervalId);
+          } else {
+            acquireLock(studentId, eventId, category, userId, userName);
+          }
+        }, 60 * 1000);
       }
     };
 
@@ -81,11 +120,11 @@ export function CategoryEditFormClient({
 
     return () => {
       if (intervalId) clearInterval(intervalId);
-      if (!isLockedBy) {
+      if (lockAcquired) {
         releaseLock(studentId, eventId, category, userId);
       }
     };
-  }, [studentId, eventId, category, isReadOnly, isLockedBy, userId, userName]);
+  }, [studentId, eventId, category, isReadOnly, hasTimedOut, userId, userName]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleFieldChange = (field: string, value: any) => {
@@ -94,12 +133,14 @@ export function CategoryEditFormClient({
 
   const req = (id: string) => requiredFields.includes(id) && <span className="text-red-500 ml-1" title="Required">*</span>;
 
-  const handleSave = async () => {
-    if (category !== "demographics" && !formData.status_nor) {
-      setError("Please select the Final Department Assessment (Normal, Observe, or Referred) before saving.");
-      return;
+  const handleExit = async () => {
+    if (!isReadOnly && !hasTimedOut) {
+      await releaseLock(studentId, eventId, category, userId);
     }
+    router.push(`${basePath || '/staff'}/workspace/${eventId}/student/${studentId}`);
+  };
 
+  const handleSave = async () => {
     setIsSaving(true);
     setError(null);
 
@@ -113,6 +154,9 @@ export function CategoryEditFormClient({
     setIsSaving(false);
 
     if (result.success) {
+      if (!isReadOnly && !isLockedBy && !hasTimedOut) {
+        await releaseLock(studentId, eventId, category, userId);
+      }
       router.push(`${basePath || '/staff'}/workspace/${eventId}/student/${studentId}`);
     } else {
       setError(result.error || "Failed to save category");
@@ -502,11 +546,9 @@ export function CategoryEditFormClient({
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3 w-full">
           <div className="flex items-start sm:items-center justify-between gap-4">
             <div className="flex items-start sm:items-center gap-4">
-              <Link href={`${basePath || '/staff'}/workspace/${eventId}/student/${studentId}`}>
-                <Button variant="ghost" size="icon" className="h-10 w-10 mt-1 sm:mt-0 rounded-full border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50 text-emerald-600 transition-all shadow-sm">
-                  <ArrowLeft className="h-5 w-5" />
-                </Button>
-              </Link>
+              <Button onClick={handleExit} variant="ghost" size="icon" className="h-10 w-10 mt-1 sm:mt-0 rounded-full border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50 text-emerald-600 transition-all shadow-sm">
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
               <div>
                 <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-1">
                   {student?.firstName} {student?.lastName}
@@ -560,7 +602,15 @@ export function CategoryEditFormClient({
           </Alert>
         )}
 
-        {isLockedBy && !isReadOnly && (
+        {hasTimedOut && (
+          <Alert className="mb-6 border-red-200 bg-red-50 text-red-800">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Session Expired</AlertTitle>
+            <AlertDescription>Your session has been inactive for 5 minutes. The lock has been released to allow others to edit. Please refresh the page if you wish to continue editing.</AlertDescription>
+          </Alert>
+        )}
+
+        {isLockedBy && !isReadOnly && !hasTimedOut && (
           <Alert className="mb-6 border-amber-200 bg-amber-50 text-amber-800">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Record Locked</AlertTitle>
@@ -568,7 +618,7 @@ export function CategoryEditFormClient({
           </Alert>
         )}
 
-        {isReadOnly && (
+        {isReadOnly && !hasTimedOut && (
           <Alert className="mb-6 border-amber-200 bg-amber-50 text-amber-800">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Read-Only Record</AlertTitle>
@@ -587,11 +637,11 @@ export function CategoryEditFormClient({
         )}
 
         <Card className="shadow-sm border-slate-200 relative mb-6">
-          {(isReadOnly || isLockedBy) && (
+          {(isReadOnly || isLockedBy || hasTimedOut) && (
             <div className="absolute inset-0 z-10 bg-slate-50/40 cursor-not-allowed rounded-xl" title="Read Only / Locked" />
           )}
           <CardContent className="p-3">
-            <fieldset disabled={isReadOnly || !!isLockedBy}>
+            <fieldset disabled={isReadOnly || !!isLockedBy || hasTimedOut}>
               {renderFormContent()}
             </fieldset>
           </CardContent>
@@ -599,7 +649,7 @@ export function CategoryEditFormClient({
 
         {category !== "demographics" && (
           <Card className="shadow-sm border-slate-200 relative mb-6">
-            {(isReadOnly || isLockedBy) && (
+            {(isReadOnly || isLockedBy || hasTimedOut) && (
               <div className="absolute inset-0 z-10 bg-slate-50/40 cursor-not-allowed rounded-xl" title="Read Only / Locked" />
             )}
             <CardContent className="px-4 py-3 bg-slate-50 border-t-2 border-slate-700 rounded-b-xl">
@@ -607,19 +657,19 @@ export function CategoryEditFormClient({
                 <Label className="text-xs font-black tracking-wide uppercase text-slate-700 shrink-0">Assessment <span className="text-red-500">*</span></Label>
                 <div className="flex gap-2 flex-1">
                   <div
-                    onClick={() => !isReadOnly && !isLockedBy && setFormData((prev: any) => ({ ...prev, status_nor: 'N' }))}
+                    onClick={() => !isReadOnly && !isLockedBy && !hasTimedOut && setFormData((prev: any) => ({ ...prev, status_nor: 'N' }))}
                     className={`flex-1 cursor-pointer border-2 rounded-lg px-3 py-1.5 text-center transition-all ${formData.status_nor === 'N' ? 'bg-green-100 border-green-500 shadow-sm' : 'bg-white border-slate-200 hover:border-green-300'}`}>
                     <span className={`font-black text-base ${formData.status_nor === 'N' ? 'text-green-700' : 'text-slate-400'}`}>N</span>
                     <span className={`text-[9px] font-bold uppercase tracking-widest ml-1 ${formData.status_nor === 'N' ? 'text-green-800' : 'text-slate-500'}`}>Normal</span>
                   </div>
                   <div
-                    onClick={() => !isReadOnly && !isLockedBy && setFormData((prev: any) => ({ ...prev, status_nor: 'O' }))}
+                    onClick={() => !isReadOnly && !isLockedBy && !hasTimedOut && setFormData((prev: any) => ({ ...prev, status_nor: 'O' }))}
                     className={`flex-1 cursor-pointer border-2 rounded-lg px-3 py-1.5 text-center transition-all ${formData.status_nor === 'O' ? 'bg-amber-100 border-amber-500 shadow-sm' : 'bg-white border-slate-200 hover:border-amber-300'}`}>
                     <span className={`font-black text-base ${formData.status_nor === 'O' ? 'text-amber-700' : 'text-slate-400'}`}>O</span>
                     <span className={`text-[9px] font-bold uppercase tracking-widest ml-1 ${formData.status_nor === 'O' ? 'text-amber-800' : 'text-slate-500'}`}>Observe</span>
                   </div>
                   <div
-                    onClick={() => !isReadOnly && !isLockedBy && setFormData((prev: any) => ({ ...prev, status_nor: 'R' }))}
+                    onClick={() => !isReadOnly && !isLockedBy && !hasTimedOut && setFormData((prev: any) => ({ ...prev, status_nor: 'R' }))}
                     className={`flex-1 cursor-pointer border-2 rounded-lg px-3 py-1.5 text-center transition-all ${formData.status_nor === 'R' ? 'bg-red-100 border-red-500 shadow-sm' : 'bg-white border-slate-200 hover:border-red-300'}`}>
                     <span className={`font-black text-base ${formData.status_nor === 'R' ? 'text-red-700' : 'text-slate-400'}`}>R</span>
                     <span className={`text-[9px] font-bold uppercase tracking-widest ml-1 ${formData.status_nor === 'R' ? 'text-red-800' : 'text-slate-500'}`}>Referred</span>
@@ -639,10 +689,16 @@ export function CategoryEditFormClient({
             <div className="text-sm text-slate-500 flex items-center gap-2">
               <FileCheck className="h-4 w-4" /> Editing
             </div>
-            <div className="flex gap-3">
-              <Link href={`${basePath || '/staff'}/workspace/${eventId}/student/${studentId}`}>
-                <Button variant="outline">Cancel</Button>
-              </Link>
+            <div className="flex items-center gap-3">
+              {initialData?._managedBy && (
+                <div className="text-xs text-slate-500 mr-2 border-r border-slate-200 pr-4">
+                  <span className="font-semibold">Last Saved By:</span>{" "}
+                  {/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(initialData._managedBy)
+                    ? "Staff Member"
+                    : initialData._managedBy}
+                </div>
+              )}
+              <Button onClick={handleExit} variant="outline">Cancel</Button>
               <Button onClick={handleSave} disabled={isSaving} className="bg-emerald-600 hover:bg-emerald-700">
                 {isSaving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</> : <><Save className="mr-2 h-4 w-4" /> Save Category</>}
               </Button>

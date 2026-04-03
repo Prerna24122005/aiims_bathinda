@@ -102,7 +102,10 @@ export default async function StudentRecordMasterView(props: {
         return val !== undefined && val !== null && val !== "" && val !== false;
       });
 
-      if (requiredFields.length === 0 || hasAllRequired) {
+      // A section is COMPLETED only if all required fields are filled AND it has a status_nor (if not demographics)
+      const isAssessmentComplete = cat.id === "demographics" || !!dataForCat.status_nor;
+
+      if ((requiredFields.length === 0 || hasAllRequired) && isAssessmentComplete) {
         status = "COMPLETED";
         completedCount++;
       } else {

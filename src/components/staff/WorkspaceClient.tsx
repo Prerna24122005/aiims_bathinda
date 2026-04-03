@@ -14,6 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2 } from "lucide-react";
 import { ManageSectionsDialog } from "./ManageSectionsDialog";
 import { RealTimeRefresher } from "@/components/shared/RealTimeRefresher";
+import { useSession } from "next-auth/react";
+import { getStudentNavigationUrl } from "@/lib/utils/navigation";
 import Papa from "papaparse";
 import { useRef } from "react";
 
@@ -35,6 +37,11 @@ export function WorkspaceClient({
   eventStaff,
   formConfig,
   currentUserId,
+  pocName,
+  pocPhone,
+  pocEmail,
+  eventHeadName,
+  eventHeadDepartment,
 }: {
   eventId: string;
   students: StudentData[];
@@ -45,7 +52,14 @@ export function WorkspaceClient({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   formConfig: any;
   currentUserId: string;
+  pocName?: string | null;
+  pocPhone?: string | null;
+  pocEmail?: string | null;
+  eventHeadName?: string | null;
+  eventHeadDepartment?: string | null;
 }) {
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.role === "ADMIN";
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -286,6 +300,36 @@ export function WorkspaceClient({
               <p className="text-sm text-slate-500">
                 {new Date(eventDate).toLocaleDateString()} • {location}
               </p>
+
+              {/* POC + Event Head info chips */}
+              <div className="flex flex-wrap gap-x-5 gap-y-1 mt-2">
+                {pocName && (
+                  <span className="flex items-baseline gap-1.5 text-[11px] font-medium text-slate-500">
+                    <span className="font-bold text-emerald-600 uppercase tracking-wide text-[10px]">POC:</span>
+                    <span className="text-slate-700">{pocName}</span>
+                    {pocPhone && (
+                      <a
+                        href={`tel:${pocPhone}`}
+                        onClick={e => e.stopPropagation()}
+                        className="ml-0.5 text-emerald-600 hover:text-emerald-700 font-semibold"
+                      >
+                        {pocPhone}
+                      </a>
+                    )}
+                  </span>
+                )}
+                {eventHeadName && (
+                  <span className="flex items-baseline gap-1.5 text-[11px] font-medium text-slate-500">
+                    <span className="font-bold text-amber-600 uppercase tracking-wide text-[10px]">Head:</span>
+                    <span className="text-slate-700">{eventHeadName}</span>
+                    {eventHeadDepartment && (
+                      <span className="text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded-md uppercase tracking-wider">
+                        {eventHeadDepartment.replace(/_/g, " ")}
+                      </span>
+                    )}
+                  </span>
+                )}
+              </div>
             </div>
 
             <div className="flex items-center gap-4 bg-slate-50 p-2 sm:p-3 rounded-lg border">
@@ -465,7 +509,8 @@ export function WorkspaceClient({
                       key={student.id}
                       onClick={() => {
                         if (dynamicStatus === "UPCOMING") return;
-                        router.push(`/staff/workspace/${eventId}/student/${student.id}`);
+                        const navUrl = getStudentNavigationUrl(student.id, eventId, currentUserId, formConfig, isAdmin, false, true);
+                        router.push(navUrl);
                       }}
                       className={`transition-colors group ${dynamicStatus === "UPCOMING" ? 'opacity-60 bg-slate-50' : 'cursor-pointer hover:bg-slate-50/80 hover:shadow-sm'
                         }`}

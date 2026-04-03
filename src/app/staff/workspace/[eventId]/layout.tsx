@@ -16,7 +16,12 @@ export default async function WorkspaceLayout(props: {
 
   const event = await (prisma.event as any).findUnique({
     where: { id: eventId },
-    include: {
+    select: {
+      id: true,
+      schoolDetails: true,
+      eventDate: true,
+      pocName: true,
+      formConfig: true,
       eventStaff: {
         select: {
           user: {
@@ -49,7 +54,12 @@ export default async function WorkspaceLayout(props: {
       <Navbar role={session?.user?.role || "MEDICAL_STAFF"} userName={session?.user?.name || "Dr. Staff"} />
       <div className="flex flex-1 overflow-hidden h-full">
         {/* Sidebar */}
-        <StudentSidebar students={event.students} eventId={eventId} />
+        <StudentSidebar 
+          students={event.students} 
+          eventId={eventId} 
+          formConfig={event.formConfig}
+          currentUserId={session?.user?.id || ""}
+        />
         
         {/* Main Content Area */}
         <main className="flex-1 overflow-y-auto bg-slate-50 scroll-smooth">
