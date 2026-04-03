@@ -263,6 +263,27 @@ export function CategoryEditFormClient({
 
   const [isSaved, setIsSaved] = useState(false);
 
+  // Initialize and sync 'isSaved' state based on initialData
+  useEffect(() => {
+    if (Object.keys(initialData || {}).length > 0) {
+      // If there's already data, check completion
+      const isComplete = requiredFields.length > 0 
+        ? requiredFields.every(field => {
+            const val = initialData[field];
+            return val !== undefined && val !== null && val !== "";
+          })
+        : true;
+      
+      if (isComplete) {
+        setIsSaved(true);
+      } else {
+        setIsSaved(false);
+      }
+    } else {
+      setIsSaved(false);
+    }
+  }, [category, initialData, requiredFields]);
+
   const handleSave = async () => {
     setIsSaving(true);
     setError(null);
@@ -650,61 +671,63 @@ export function CategoryEditFormClient({
     <div className={`flex flex-col ${isEmbedded ? '' : 'min-h-screen bg-slate-50 pb-12 pt-16'}`}>
       {!isEmbedded && <Navbar />}
 
-      {/* Category Editor Header */}
-      <div className="bg-white border-b shrink-0 z-20 shadow-sm sticky top-0">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3 w-full">
-          <div className="flex items-start sm:items-center justify-between gap-4">
-            <div className="flex items-start sm:items-center gap-4">
-              <Button onClick={handleExit} variant="ghost" size="icon" className="h-10 w-10 mt-1 sm:mt-0 rounded-full border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50 text-emerald-600 transition-all shadow-sm">
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-1">
-                  {student?.firstName} {student?.lastName}
-                </h1>
-                <div className="flex flex-wrap items-center gap-2">
-                  <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 uppercase tracking-widest shrink-0">
-                    {customCategoryBlock ? customCategoryBlock.title : (
-                      category === "ent" ? "ENT Examination" :
-                        category === "communityMed" ? "Community Medicine" :
-                          category === "dental" ? "Dental Examination" :
-                            category === "optical" ? "Optical Examination" :
-                              category === "skin" ? "Skin Examination" :
-                                category.replace(/([A-Z])/g, ' $1').trim()
-                    )}
-                  </div>
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-bold text-slate-500 uppercase tracking-tight">
-                    <span className="flex items-center gap-1"><span className="opacity-40">Class:</span> {student?.classSec}</span>
-                    <span className="flex items-center gap-1"><span className="opacity-40">Age:</span> {student?.age}</span>
-                    {(() => {
-                      let bmi = "NA";
-                      if (category === "general_examination_merged") {
-                        const h = parseFloat(formData.height);
-                        const w = parseFloat(formData.weight);
-                        if (h && w) bmi = (w / Math.pow(h / 100, 2)).toFixed(1);
-                      } else {
-                        const recordData = (student?.medicalRecord?.data as Record<string, any>) || {};
-                        const genData = recordData.general_examination_merged || {};
-                        const height = parseFloat(genData.height);
-                        const weight = parseFloat(genData.weight);
-                        if (height && weight) bmi = (weight / Math.pow(height / 100, 2)).toFixed(1);
-                      }
-                      return (
-                        <span className="flex items-center gap-1 text-emerald-600">
-                          <span className="opacity-60 text-slate-500 font-bold">BMI:</span> {bmi}
-                        </span>
-                      );
-                    })()}
+      {/* Category Editor Header - Only show if NOT embedded to avoid duplicates */}
+      {!isEmbedded && (
+        <div className="bg-white border-b shrink-0 z-20 shadow-sm sticky top-0">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3 w-full">
+            <div className="flex items-start sm:items-center justify-between gap-4">
+              <div className="flex items-start sm:items-center gap-4">
+                <Button onClick={handleExit} variant="ghost" size="icon" className="h-10 w-10 mt-1 sm:mt-0 rounded-full border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50 text-emerald-600 transition-all shadow-sm">
+                  <ArrowLeft className="h-5 w-5" />
+                </Button>
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-1">
+                    {student?.firstName} {student?.lastName}
+                  </h1>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 uppercase tracking-widest shrink-0">
+                      {customCategoryBlock ? customCategoryBlock.title : (
+                        category === "ent" ? "ENT Examination" :
+                          category === "communityMed" ? "Community Medicine" :
+                            category === "dental" ? "Dental Examination" :
+                              category === "optical" ? "Optical Examination" :
+                                category === "skin" ? "Skin Examination" :
+                                  category.replace(/([A-Z])/g, ' $1').trim()
+                      )}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-bold text-slate-500 uppercase tracking-tight">
+                      <span className="flex items-center gap-1"><span className="opacity-40">Class:</span> {student?.classSec}</span>
+                      <span className="flex items-center gap-1"><span className="opacity-40">Age:</span> {student?.age}</span>
+                      {(() => {
+                        let bmi = "NA";
+                        if (category === "general_examination_merged") {
+                          const h = parseFloat(formData.height);
+                          const w = parseFloat(formData.weight);
+                          if (h && w) bmi = (w / Math.pow(h / 100, 2)).toFixed(1);
+                        } else {
+                          const recordData = (student?.medicalRecord?.data as Record<string, any>) || {};
+                          const genData = recordData.general_examination_merged || {};
+                          const height = parseFloat(genData.height);
+                          const weight = parseFloat(genData.weight);
+                          if (height && weight) bmi = (weight / Math.pow(height / 100, 2)).toFixed(1);
+                        }
+                        return (
+                          <span className="flex items-center gap-1 text-emerald-600">
+                            <span className="opacity-60 text-slate-500 font-bold">BMI:</span> {bmi}
+                          </span>
+                        );
+                      })()}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       <main className={`flex-1 w-full max-w-4xl mx-auto ${isEmbedded ? 'p-0' : 'p-3 sm:p-5 lg:p-6'} overflow-y-auto pb-24`}>
-        {initialData?._managedBy && initialData._managedBy !== userName && (
+        {initialData?._managedBy && initialData._managedBy !== userName && !isReadOnly && (
           <Alert className="mb-4 border-amber-300 bg-amber-50 shadow-sm">
             <AlertCircle className="h-4 w-4 text-amber-600" />
             <AlertTitle className="text-amber-800 font-bold text-sm">Previously Filled by Another Doctor</AlertTitle>
