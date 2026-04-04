@@ -23,12 +23,12 @@ export function ReferredListClient({ students, eventId }: ReferredListClientProp
     const [selectedDept, setSelectedDept] = useState<string>("ALL");
     const [search, setSearch] = useState("");
 
-    const DEPTS = ["ENT", "Dental", "Optical", "Skin", "Comm. Med"];
+    const DEPTS = ["ENT Examination", "Dental Examination", "Ophthalmology Examination", "Dermatology Examination", "Systemic Examination"];
 
     const filteredStudents = students.filter((stud) => {
         const matchesDept = selectedDept === "ALL" || stud.depts.includes(selectedDept);
-        const matchesSearch = stud.name.toLowerCase().includes(search.toLowerCase()) || 
-                             stud.classSec.toLowerCase().includes(search.toLowerCase());
+        const matchesSearch = stud.name.toLowerCase().includes(search.toLowerCase()) ||
+            stud.classSec.toLowerCase().includes(search.toLowerCase());
         return matchesDept && matchesSearch;
     });
 

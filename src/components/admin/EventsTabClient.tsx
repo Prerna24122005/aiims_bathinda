@@ -17,6 +17,8 @@ type EventType = {
   status: string;
   pocName: string;
   eventHeadName: string;
+  referredCount?: number;
+  observationCount?: number;
   _count: { eventStaff: number; students: number; }
 };
 
@@ -145,6 +147,7 @@ export function EventsTabClient({ events, actionButton }: { events: EventType[],
                   <th className="px-6 py-4 font-semibold border-r border-slate-100 last:border-r-0">Date</th>
                   <th className="px-6 py-4 font-semibold text-center border-r border-slate-100 last:border-r-0">Status</th>
                   <th className="px-6 py-4 font-semibold border-r border-slate-100 last:border-r-0">POC & Event Head</th>
+                  <th className="px-6 py-4 font-semibold border-r border-slate-100 last:border-r-0 text-center">Flags</th>
                   <th className="px-4 py-4 font-semibold text-center border-r border-slate-100 last:border-r-0">Students</th>
                   <th className="px-4 py-4 font-semibold text-center border-r border-slate-100 last:border-r-0">Staff</th>
                   <th className="px-6 py-4 font-semibold text-center">Actions</th>
@@ -192,6 +195,29 @@ export function EventsTabClient({ events, actionButton }: { events: EventType[],
                           </div>
                         </div>
                       </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                          {(event.referredCount ?? 0) > 0 && (
+                            <span
+                              onClick={e => { e.stopPropagation(); router.push(`/admin/events/${event.id}/referred`); }}
+                              className="inline-flex items-center text-[10px] font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded-full border border-red-200 hover:bg-red-100 transition-colors cursor-pointer"
+                            >
+                              {event.referredCount} Referred
+                            </span>
+                          )}
+                          {(event.observationCount ?? 0) > 0 && (
+                            <span
+                              onClick={e => { e.stopPropagation(); router.push(`/admin/events/${event.id}/observation`); }}
+                              className="inline-flex items-center text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 hover:bg-amber-100 transition-colors cursor-pointer"
+                            >
+                              {event.observationCount} Observe
+                            </span>
+                          )}
+                          {!event.referredCount && !event.observationCount && (
+                            <span className="text-slate-300 text-xs">—</span>
+                          )}
+                        </div>
+                      </td>
                       <td className="px-4 py-4 text-center">
                         <span className="text-sm font-semibold text-slate-700">{event._count.students}</span>
                       </td>
@@ -215,7 +241,7 @@ export function EventsTabClient({ events, actionButton }: { events: EventType[],
                 {/* Past Events Separator Row */}
                 {pastEvents.length > 0 && (
                   <tr className="bg-slate-50/50">
-                    <td colSpan={7} className="px-6 py-3">
+                    <td colSpan={8} className="px-6 py-3">
                       <div className="flex items-center gap-4">
                         <div className="flex-1 h-px bg-slate-200" />
                         <button
@@ -269,6 +295,29 @@ export function EventsTabClient({ events, actionButton }: { events: EventType[],
                             <span className="text-slate-500 font-bold uppercase tracking-tighter w-8">Head:</span>
                             <span className="text-slate-600 font-medium truncate max-w-[120px]">{event.eventHeadName}</span>
                           </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                          {(event.referredCount ?? 0) > 0 && (
+                            <span
+                              onClick={e => { e.stopPropagation(); router.push(`/admin/events/${event.id}/referred`); }}
+                              className="inline-flex items-center text-[10px] font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded-full border border-red-200 hover:bg-red-100 transition-colors cursor-pointer"
+                            >
+                              {event.referredCount} Referred
+                            </span>
+                          )}
+                          {(event.observationCount ?? 0) > 0 && (
+                            <span
+                              onClick={e => { e.stopPropagation(); router.push(`/admin/events/${event.id}/observation`); }}
+                              className="inline-flex items-center text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 hover:bg-amber-100 transition-colors cursor-pointer"
+                            >
+                              {event.observationCount} Observe
+                            </span>
+                          )}
+                          {!event.referredCount && !event.observationCount && (
+                            <span className="text-slate-300 text-xs">—</span>
+                          )}
                         </div>
                       </td>
                       <td className="px-4 py-4 text-center">

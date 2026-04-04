@@ -57,11 +57,7 @@ export function AdminStudentCategoryGrid({
     const [activeTab, setActiveTab ] = useState<string>(categoriesStatus[0]?.id || "");
     const activeCat = categoriesStatus.find(c => c.id === activeTab) || categoriesStatus[0];
 
-    const getStatusColors = (status: string) => {
-        if (status === 'COMPLETED') return 'bg-green-100 text-green-700 border-green-300 ring-green-500';
-        if (status === 'IN_PROGRESS') return 'bg-amber-100 text-amber-700 border-amber-300 ring-amber-500';
-        return 'bg-slate-50 text-slate-400 border-slate-200 ring-slate-400';
-    };
+    const baseColors = 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50';
 
     return (
         <div className="flex flex-col min-h-screen bg-slate-50/50">
@@ -119,7 +115,6 @@ export function AdminStudentCategoryGrid({
                     <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
                         {categoriesStatus.map((cat) => {
                             const isActive = activeTab === cat.id;
-                            const colors = getStatusColors(cat.status);
                             
                             return (
                                 <div 
@@ -127,21 +122,21 @@ export function AdminStudentCategoryGrid({
                                     title={cat.title}
                                     onClick={() => setActiveTab(cat.id)}
                                     className={`relative group h-12 w-12 sm:h-13 sm:w-13 flex items-center justify-center rounded-xl border-2 transition-all cursor-pointer shadow-sm
-                                        ${colors} 
+                                        ${baseColors} 
                                         ${isActive ? 'ring-2 ring-emerald-500 scale-110 z-10 border-emerald-500 bg-emerald-50 text-emerald-600 shadow-md' : 'hover:scale-105 active:scale-95'}
+                                        ${(cat.data?.status_nor === 'R' || cat.data?.status_nor === 'O') ? 'border-red-500 border-[3px] shadow-[0_0_10px_rgba(239,68,68,0.3)] animate-pulse-subtle' : ''}
                                     `}
                                 >
-                                    <CategoryIcon name={cat.iconName} className={`h-6 w-6 sm:h-6.5 sm:w-6.5 ${isActive ? 'text-emerald-600' : ''}`} />
+                                    <CategoryIcon name={cat.iconName} className={`h-6 w-6 sm:h-6.5 sm:w-6.5 ${isActive ? 'text-emerald-600' : ''} ${(cat.data?.status_nor === 'R' || cat.data?.status_nor === 'O') ? 'text-red-600' : ''}`} />
                                     
-                                    {cat.status === 'COMPLETED' ? (
-                                        <div className="absolute -bottom-1 -right-1 bg-green-500 rounded-full border border-white p-0.5 shadow-sm">
-                                            <CheckCircle2 className="h-2.5 w-2.5 text-white" />
+                                    {/* Completion status badges hidden for a clean read-only Admin look */}
+
+                                    {/* Red indicator for R/O status */}
+                                    {(cat.data?.status_nor === 'R' || cat.data?.status_nor === 'O') && (
+                                        <div className="absolute -top-1 -right-1 bg-red-600 rounded-full border border-white px-1 shadow-sm flex items-center justify-center min-w-[14px] h-[14px]">
+                                            <span className="text-[8px] font-black text-white">{cat.data.status_nor}</span>
                                         </div>
-                                    ) : cat.status === 'IN_PROGRESS' ? (
-                                        <div className="absolute -bottom-1 -right-1 bg-amber-500 rounded-full border border-white p-0.5 shadow-sm">
-                                            <Clock className="h-2.5 w-2.5 text-white" />
-                                        </div>
-                                    ) : null}
+                                    )}
 
                                     {/* Section Name Tooltip */}
                                     <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-slate-900/90 text-white text-[10px] font-black px-2 py-1 rounded backdrop-blur-sm opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-40 shadow-xl border border-white/10 uppercase tracking-tighter">

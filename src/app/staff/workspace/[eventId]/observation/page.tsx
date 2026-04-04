@@ -44,7 +44,12 @@ export default async function ObservationStudentsPage({ params }: { params: Prom
     }
 
     const DEPT_MAP: Record<string, string> = {
-        ent: "ENT", dental: "Dental", optical: "Optical", skin: "Skin", communityMed: "Comm. Med"
+        ent_examination: "ENT Examination",
+        dental_examination: "Dental Examination",
+        optical_examination: "Ophthalmology Examination",
+        skin_examination: "Dermatology Examination",
+        system_wise_examination: "Systemic Examination",
+        general_examination_merged: "General"
     };
 
     const observationStudents = (event.students as any[]).filter(stud => {

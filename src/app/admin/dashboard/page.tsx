@@ -35,21 +35,55 @@ export default async function AdminDashboard() {
       eventStaff: {
         include: { user: true }
       },
+      students: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          classSec: true,
+          medicalRecord: {
+            select: { data: true }
+          }
+        }
+      },
       _count: {
         select: { eventStaff: true, students: true }
       }
     }
   });
 
+  const DEPT_MAP: Record<string, string> = {
+    ent_examination: "ENT Examination",
+    dental_examination: "Dental Examination",
+    optical_examination: "Ophthalmology Examination",
+    skin_examination: "Dermatology Examination",
+    system_wise_examination: "Systemic Examination",
+    general_examination_merged: "General"
+  };
+
   // Map and Enrich
   const enrichedEvents = allEvents.map((event: any) => {
     const eventHeadId = (event.formConfig as any)?.eventHeadId;
     const eventHead = (event.eventStaff as any[]).find((s: any) => s.user.id === eventHeadId)?.user?.fullName || "Not Assigned";
 
+    const referredCount = event.students.filter((stud: any) => {
+      const data = stud.medicalRecord?.data as Record<string, any> | null;
+      if (!data) return false;
+      return Object.values(data).some((catData: any) => catData?.status_nor === 'R');
+    }).length;
+
+    const observationCount = event.students.filter((stud: any) => {
+      const data = stud.medicalRecord?.data as Record<string, any> | null;
+      if (!data) return false;
+      return Object.values(data).some((catData: any) => catData?.status_nor === 'O');
+    }).length;
+
     return {
       ...event,
       pocName: event.pocName,
-      eventHeadName: eventHead
+      eventHeadName: eventHead,
+      referredCount,
+      observationCount
     };
   });
 

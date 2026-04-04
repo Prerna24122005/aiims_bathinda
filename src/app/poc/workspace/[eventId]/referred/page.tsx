@@ -36,11 +36,11 @@ export default async function PocReferredStudentsPage({ params }: { params: Prom
     }
 
     const DEPT_MAP: Record<string, string> = {
-        ent_examination: "ENT",
-        dental_examination: "Dental",
-        optical_examination: "Optical",
-        skin_examination: "Skin",
-        system_wise_examination: "Comm. Med",
+        ent_examination: "ENT Examination",
+        dental_examination: "Dental Examination",
+        optical_examination: "Ophthalmology Examination",
+        skin_examination: "Dermatology Examination",
+        system_wise_examination: "Systemic Examination",
         general_examination_merged: "General"
     };
 
