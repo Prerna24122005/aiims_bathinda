@@ -14,7 +14,8 @@ export default async function PocDashboard() {
     // Fetch events where user is the POC for the school
     const events = await (prisma.event as any).findMany({
         where: {
-            pocEmail: session.user.email || "undefined"
+            pocEmail: session.user.email || "undefined",
+            status: { not: "CANCELLED" }
         },
         include: {
             eventStaff: {

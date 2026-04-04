@@ -18,7 +18,8 @@ export default async function StaffDashboard() {
   // Fetch events where user is assigned staff
   const events = await (prisma.event as any).findMany({
     where: {
-      eventStaff: { some: { userId: session.user.id } }
+      eventStaff: { some: { userId: session.user.id } },
+      status: { not: "CANCELLED" }
     },
     include: {
       eventStaff: {
