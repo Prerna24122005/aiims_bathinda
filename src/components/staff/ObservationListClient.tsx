@@ -27,8 +27,8 @@ export function ObservationListClient({ students, eventId }: ObservationListClie
 
     const filteredStudents = students.filter((stud) => {
         const matchesDept = selectedDept === "ALL" || stud.depts.includes(selectedDept);
-        const matchesSearch = stud.name.toLowerCase().includes(search.toLowerCase()) || 
-                             stud.classSec.toLowerCase().includes(search.toLowerCase());
+        const matchesSearch = stud.name.toLowerCase().includes(search.toLowerCase()) ||
+            stud.classSec.toLowerCase().includes(search.toLowerCase());
         return matchesDept && matchesSearch;
     });
 

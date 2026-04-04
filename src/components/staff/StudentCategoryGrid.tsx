@@ -38,7 +38,7 @@ const isMedicalIssue = (key: string, val: any) => {
         const lower = val.toLowerCase().trim();
         if (lower === 'none' || lower === 'nil' || lower === 'na' || lower === 'n/a' || lower === 'no') return false;
         const k = key.toLowerCase();
-        const normalWords = ['normal', 'healthy', 'good', 'fair', '6/6', '6/9']; 
+        const normalWords = ['normal', 'healthy', 'good', 'fair', '6/6', '6/9'];
         if (['hearing', 'earexam', 'noseexam', 'throatexam', 'generalappearance', 'oralhygiene', 'gums', 'visionright', 'visionleft', 'colorvision', 'skincondition'].includes(k)) {
             return !normalWords.includes(lower);
         }
@@ -94,7 +94,7 @@ export function StudentCategoryGrid({
     formConfig?: any;
     isUpcoming?: boolean;
 }) {
-    const [activeTab, setActiveTab ] = useState<string>(categoriesStatus[0]?.id || "");
+    const [activeTab, setActiveTab] = useState<string>(categoriesStatus[0]?.id || "");
     const activeCat = categoriesStatus.find(c => c.id === activeTab) || categoriesStatus[0];
 
     const getStatusColors = (status: string, isAssigned: boolean) => {
@@ -153,21 +153,32 @@ export function StudentCategoryGrid({
                             const isAssigned = assignedCategoryIds.includes(cat.id);
                             const isActive = activeTab === cat.id;
                             const colors = getStatusColors(cat.status, isAssigned);
-                            
+
                             return (
-                                <div 
-                                    key={cat.id} 
+                                <div
+                                    key={cat.id}
                                     title={cat.title}
                                     onClick={() => setActiveTab(cat.id)}
                                     className={`relative group h-12 w-12 sm:h-14 sm:w-14 flex items-center justify-center rounded-xl border-2 transition-all cursor-pointer shadow-sm
-                                        ${colors} 
+                                        ${(cat.data?.status_nor === 'R' || cat.data?.status_nor === 'O')
+                                            ? 'bg-red-50 border-red-500 border-[3px] shadow-[0_0_12px_rgba(239,68,68,0.35)] text-red-600 animate-pulse-subtle'
+                                            : colors}
                                         ${isActive ? 'ring-2 ring-offset-2 scale-110 z-10 border-indigo-500' : 'hover:scale-105 active:scale-95'}
                                         ${isUpcoming ? 'opacity-60 grayscale-[0.3]' : ''}
-                                        ${(cat.data?.status_nor === 'R' || cat.data?.status_nor === 'O') ? 'border-red-500 ring-2 ring-red-200' : ''}
                                     `}
                                 >
-                                    <CategoryIcon name={cat.iconName} className={`h-6 w-6 sm:h-7 sm:w-7 ${isActive ? 'text-indigo-600' : ''}`} />
-                                    
+                                    <CategoryIcon name={cat.iconName} className={`h-6 w-6 sm:h-7 sm:w-7 ${(cat.data?.status_nor === 'R' || cat.data?.status_nor === 'O') ? 'text-red-600' :
+                                            isActive ? 'text-indigo-600' : ''
+                                        }`} />
+
+                                    {/* R/O Badge for flagged sections */}
+                                    {(cat.data?.status_nor === 'R' || cat.data?.status_nor === 'O') && (
+                                        <div className={`absolute -top-1.5 -left-1.5 h-4 w-4 rounded-full border-2 border-white flex items-center justify-center shadow-sm text-[7px] font-black text-white ${cat.data?.status_nor === 'R' ? 'bg-red-600' : 'bg-amber-500'
+                                            }`}>
+                                            {cat.data?.status_nor}
+                                        </div>
+                                    )}
+
                                     {/* Small Indicator Dots */}
                                     {isAssigned && (
                                         <div className="absolute -top-1.5 -right-1.5 h-4 w-4 bg-emerald-600 rounded-full border-2 border-white flex items-center justify-center shadow-sm" title="Assigned to You">
