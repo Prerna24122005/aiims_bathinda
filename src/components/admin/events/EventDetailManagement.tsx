@@ -269,30 +269,32 @@ export function EventDetailManagement({
                 </div>
 
                 {/* Filter and Search Bar - Mirroring Staff Side */}
-                <div className="flex flex-col sm:flex-row justify-between items-start lg:items-center gap-4 mb-6">
-                  <div className="relative w-full sm:max-w-md lg:w-[300px]">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                    <Input
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      placeholder="Search student name or class..."
-                      className="pl-10 w-full bg-white shadow-sm"
-                    />
-                  </div>
+                <div className="sticky top-0 z-20 bg-slate-50/95 backdrop-blur-sm -mx-4 px-4 md:-mx-6 md:px-6 py-4 mb-2 transition-all">
+                  <div className="flex flex-col sm:flex-row justify-between items-start lg:items-center gap-4">
+                    <div className="relative w-full sm:max-w-md lg:w-[300px]">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                      <Input
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="Search student name or class..."
+                        className="pl-10 w-full bg-white shadow-sm"
+                      />
+                    </div>
 
-                  <div className="flex bg-slate-100 p-1 rounded-lg overflow-x-auto w-full sm:w-auto self-start">
-                    {['ALL', 'PENDING', 'IN_PROGRESS', 'COMPLETED'].map(status => (
-                      <button
-                        key={status}
-                        onClick={() => setStatusFilter(status)}
-                        className={`px-4 py-1.5 text-sm font-medium rounded-md whitespace-nowrap transition-all flex-1 sm:flex-none ${statusFilter === status
-                          ? 'bg-white text-slate-900 shadow-sm'
-                          : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
-                          }`}
-                      >
-                        {status === 'ALL' ? 'All' : status === 'IN_PROGRESS' ? 'In Progress' : status === 'PENDING' ? 'Pending' : 'Completed'}
-                      </button>
-                    ))}
+                    <div className="flex bg-slate-100 p-1 rounded-lg overflow-x-auto w-full sm:w-auto self-start">
+                      {['ALL', 'PENDING', 'IN_PROGRESS', 'COMPLETED'].map(status => (
+                        <button
+                          key={status}
+                          onClick={() => setStatusFilter(status)}
+                          className={`px-4 py-1.5 text-sm font-medium rounded-md whitespace-nowrap transition-all flex-1 sm:flex-none ${statusFilter === status
+                            ? 'bg-white text-slate-900 shadow-sm'
+                            : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+                            }`}
+                        >
+                          {status === 'ALL' ? 'All' : status === 'IN_PROGRESS' ? 'In Progress' : status === 'PENDING' ? 'Pending' : 'Completed'}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
 

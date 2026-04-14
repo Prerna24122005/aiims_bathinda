@@ -375,146 +375,148 @@ export function WorkspaceClient({
 
       <main className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
 
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
-          <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
-            <div className="relative w-full sm:max-w-md lg:w-[300px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search student name or class..."
-                className="pl-10 w-full bg-white shadow-sm"
-              />
-            </div>
-            {/* Student addition restricted to Active/Upcoming events */}
-            {dynamicStatus !== "PAST" && (
-              <div className="flex ml-auto gap-2 w-full sm:w-auto">
-                <input
-                  type="file"
-                  accept=".csv"
-                  className="hidden"
-                  ref={fileInputRef}
-                  onChange={handleCSVUpload}
+        <div className="sticky top-[73px] z-20 bg-slate-50/95 backdrop-blur-sm -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 pb-4 mb-2 transition-all">
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+            <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
+              <div className="relative w-full sm:max-w-md lg:w-[300px]">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search student name or class..."
+                  className="pl-10 w-full bg-white shadow-sm"
                 />
-                <Button
-                  variant="outline"
-                  className="flex-1 sm:flex-none"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isUploadingCSV}
-                >
-                  {isUploadingCSV ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileUp className="mr-2 h-4 w-4" />}
-                  {isUploadingCSV ? "Uploading..." : "CSV Upload"}
-                </Button>
-
-                {formConfig?.eventHeadId === currentUserId && (
-                  <ManageSectionsDialog
-                    eventId={eventId}
-                    formConfig={formConfig}
-                    eventStaff={eventStaff}
+              </div>
+              {/* Student addition restricted to Active/Upcoming events */}
+              {dynamicStatus !== "PAST" && (
+                <div className="flex ml-auto gap-2 w-full sm:w-auto">
+                  <input
+                    type="file"
+                    accept=".csv"
+                    className="hidden"
+                    ref={fileInputRef}
+                    onChange={handleCSVUpload}
                   />
-                )}
+                  <Button
+                    variant="outline"
+                    className="flex-1 sm:flex-none"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploadingCSV}
+                  >
+                    {isUploadingCSV ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileUp className="mr-2 h-4 w-4" />}
+                    {isUploadingCSV ? "Uploading..." : "CSV Upload"}
+                  </Button>
 
-                <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-                  <DialogTrigger
-                    render={
-                      <Button className="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700">
-                        <UserPlus className="mr-2 h-4 w-4" /> Quick Add
-                      </Button>
-                    }
-                  />
-                  <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                      <DialogTitle>Add New Student</DialogTitle>
-                      <DialogDescription>
-                        Add a student manually to the roster. They will immediately appear in the list.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <form onSubmit={handleAddStudent} className="space-y-4 pt-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="firstName">First Name</Label>
-                          <Input id="firstName" required value={firstName} onChange={e => setFirstName(e.target.value)} />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="lastName">Last Name</Label>
-                          <Input id="lastName" required value={lastName} onChange={e => setLastName(e.target.value)} />
-                        </div>
-                      </div>
+                  {formConfig?.eventHeadId === currentUserId && (
+                    <ManageSectionsDialog
+                      eventId={eventId}
+                      formConfig={formConfig}
+                      eventStaff={eventStaff}
+                    />
+                  )}
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="dob">Date of Birth</Label>
-                          <Input id="dob" type="date" required value={dob} onChange={e => setDob(e.target.value)} />
+                  <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+                    <DialogTrigger
+                      render={
+                        <Button className="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700">
+                          <UserPlus className="mr-2 h-4 w-4" /> Quick Add
+                        </Button>
+                      }
+                    />
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>Add New Student</DialogTitle>
+                        <DialogDescription>
+                          Add a student manually to the roster. They will immediately appear in the list.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <form onSubmit={handleAddStudent} className="space-y-4 pt-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="firstName">First Name</Label>
+                            <Input id="firstName" required value={firstName} onChange={e => setFirstName(e.target.value)} />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="lastName">Last Name</Label>
+                            <Input id="lastName" required value={lastName} onChange={e => setLastName(e.target.value)} />
+                          </div>
                         </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="dob">Date of Birth</Label>
+                            <Input id="dob" type="date" required value={dob} onChange={e => setDob(e.target.value)} />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="gender">Gender</Label>
+                            <Select required value={gender} onValueChange={(val: any) => setGender(val)}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="MALE">Male</SelectItem>
+                                <SelectItem value="FEMALE">Female</SelectItem>
+                                <SelectItem value="OTHER">Other</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
                         <div className="space-y-2">
-                          <Label htmlFor="gender">Gender</Label>
-                          <Select required value={gender} onValueChange={(val: any) => setGender(val)}>
+                          <Label htmlFor="classSec">Class & Section</Label>
+                          <Input id="classSec" placeholder="e.g. 10-A" required value={classSec} onChange={e => setClassSec(e.target.value)} />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="height">Height (cm)</Label>
+                            <Input id="height" type="number" placeholder="Optional" value={height} onChange={e => setHeight(e.target.value)} />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="weight">Weight (kg) </Label>
+                            <Input id="weight" type="number" placeholder="Optional" value={weight} onChange={e => setWeight(e.target.value)} />
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="bloodGroup">Blood Group</Label>
+                          <Select value={bloodGroup} onValueChange={(val) => setBloodGroup(val || "")}>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select" />
+                              <SelectValue placeholder="Select (Optional)" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="MALE">Male</SelectItem>
-                              <SelectItem value="FEMALE">Female</SelectItem>
-                              <SelectItem value="OTHER">Other</SelectItem>
+                              {["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"].map(bg => (
+                                <SelectItem key={bg} value={bg}>{bg}</SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         </div>
-                      </div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="classSec">Class & Section</Label>
-                        <Input id="classSec" placeholder="e.g. 10-A" required value={classSec} onChange={e => setClassSec(e.target.value)} />
-                      </div>
+                        <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700" disabled={isAdding}>
+                          {isAdding ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Adding...</> : "Add Student"}
+                        </Button>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              )}
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="height">Height (cm)</Label>
-                          <Input id="height" type="number" placeholder="Optional" value={height} onChange={e => setHeight(e.target.value)} />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="weight">Weight (kg) </Label>
-                          <Input id="weight" type="number" placeholder="Optional" value={weight} onChange={e => setWeight(e.target.value)} />
-                        </div>
-                      </div>
+            </div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="bloodGroup">Blood Group</Label>
-                        <Select value={bloodGroup} onValueChange={(val) => setBloodGroup(val || "")}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select (Optional)" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"].map(bg => (
-                              <SelectItem key={bg} value={bg}>{bg}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700" disabled={isAdding}>
-                        {isAdding ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Adding...</> : "Add Student"}
-                      </Button>
-                    </form>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            )}
-
-          </div>
-
-          <div className="flex bg-slate-100 p-1 rounded-lg overflow-x-auto w-full sm:w-auto self-start">
-            {['ALL', 'PENDING', 'IN_PROGRESS', 'COMPLETED'].map(status => (
-              <button
-                key={status}
-                onClick={() => setStatusFilter(status)}
-                className={`px-4 py-1.5 text-sm font-medium rounded-md whitespace-nowrap transition-all flex-1 sm:flex-none ${statusFilter === status
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
-                  }`}
-              >
-                {status === 'ALL' ? 'All' : status === 'IN_PROGRESS' ? 'In Progress' : status === 'PENDING' ? 'Pending' : 'Completed'}
-              </button>
-            ))}
+            <div className="flex bg-slate-100 p-1 rounded-lg overflow-x-auto w-full sm:w-auto self-start">
+              {['ALL', 'PENDING', 'IN_PROGRESS', 'COMPLETED'].map(status => (
+                <button
+                  key={status}
+                  onClick={() => setStatusFilter(status)}
+                  className={`px-4 py-1.5 text-sm font-medium rounded-md whitespace-nowrap transition-all flex-1 sm:flex-none ${statusFilter === status
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+                    }`}
+                >
+                  {status === 'ALL' ? 'All' : status === 'IN_PROGRESS' ? 'In Progress' : status === 'PENDING' ? 'Pending' : 'Completed'}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
