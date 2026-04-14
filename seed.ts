@@ -4,7 +4,7 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("Seeding database with minimal test data...");
+  console.log("Seeding database with modern medical record format (8 Sections)...");
 
   // 1. Create Core Users
   const users = [
@@ -23,7 +23,7 @@ async function main() {
       "isActive": true
     },
     {
-      "email": "dr.sarah@healthcamp.org",
+      "email": "sarah@healthcamp.org",
       "passwordHash": "$2b$10$CIctCidB3Ek9I2NgSSrlb.8Thl1n3wy0RNXj0BT/VtXg7Ky9jCfsa", // sarah123
       "fullName": "Dr. Sarah",
       "role": "MEDICAL_STAFF",
@@ -42,9 +42,9 @@ async function main() {
   // 2. Create Sample HealthCampRequests
   const requests = [
     {
-      "schoolName": "Greenwood High School",
-      "pocName": "Jane Doe",
-      "pocEmail": "director@gmail.com",
+      "schoolName": "Govt Boys Senior Secondary School",
+      "pocName": "Jitender Kumar",
+      "pocEmail": "2023csb1148@iitrpr.ac.in",
       "pocPhone": "555-0100",
       "tentativeDate": new Date("2026-10-24"),
       "tentativeStudents": 400,
@@ -53,7 +53,7 @@ async function main() {
     {
       "schoolName": "Sophia Girls School",
       "pocName": "Pihu Gupta",
-      "pocEmail": "pihu@gmail.com",
+      "pocEmail": "2023csb1138@iitrpr.ac.in",
       "pocPhone": "+918619252566",
       "tentativeDate": new Date("2026-03-28"),
       "tentativeStudents": 150,
@@ -67,32 +67,26 @@ async function main() {
     });
   }
 
-  // 3. Create Sample Events
+  // 3. Create Sample Events with all 8 Sections
   const admin = await prisma.user.findUnique({ where: { email: "admin@healthcamp.org" } });
 
   const events = [
     {
-      "schoolDetails": "Greenwood High School",
+      "schoolDetails": "Govt Boys Senior Secondary School",
       "eventDate": new Date("2026-10-24"),
-      "pocName": "Jane Doe",
+      "pocName": "Jitender Kumar",
       "pocPhone": "555-0100",
-      "pocEmail": "director@gmail.com",
+      "pocEmail": "2023csb1148@iitrpr.ac.in",
       "status": "ACTIVE",
       "formConfig": {
-        "ent": ["hearing", "earExam"],
-        "communityMed": ["height", "weight", "doctorRemarks"]
-      },
-      "createdBy": admin?.id
-    },
-    {
-      "schoolDetails": "IIT ROPAR",
-      "eventDate": new Date("2026-11-15"),
-      "pocName": "Mitali",
-      "pocPhone": "2344555",
-      "pocEmail": "mitali@gmail.com",
-      "status": "UPCOMING",
-      "formConfig": {
-        "vitalsSystemic": ["height", "weight", "signDoctor"]
+        "general_examination_merged": ["firstName", "lastName", "height", "weight", "bmi", "bloodGroup"],
+        "vaccination_details": ["hepB1", "hepB2", "hepB3", "typhoid"],
+        "symptoms": ["headache", "vomiting", "faintingEpisodes"],
+        "ent_examination": ["earIssues", "noseIssues", "throatIssues"],
+        "dental_examination": ["cavities", "rottenTeeth", "gumCondition"],
+        "optical_examination": ["visionRight", "visionLeft", "spectacles"],
+        "skin_examination": ["skinCondition", "whitePatches"],
+        "system_wise_examination": ["breathlessness", "cardioIssues", "cnsIssues"]
       },
       "createdBy": admin?.id
     }
@@ -125,40 +119,49 @@ async function main() {
 
   // 4. Create EventStaff Assignments
   const prerna = await prisma.user.findUnique({ where: { email: "prerna@gmail.com" } });
-  const sarah = await prisma.user.findUnique({ where: { email: "dr.sarah@healthcamp.org" } });
-  const greenwood = await prisma.event.findFirst({ where: { schoolDetails: "Greenwood High School" } });
+  const sarah = await prisma.user.findUnique({ where: { email: "sarah@healthcamp.org" } });
+  const Govt = await prisma.event.findFirst({ where: { schoolDetails: "Govt Boys Senior Secondary School" } });
 
-  if (greenwood && prerna && sarah) {
+  if (Govt && prerna && sarah) {
     await prisma.eventStaff.create({
-      data: { eventId: greenwood.id, userId: prerna.id }
+      data: { eventId: Govt.id, userId: prerna.id }
     });
     await prisma.eventStaff.create({
-      data: { eventId: greenwood.id, userId: sarah.id }
+      data: { eventId: Govt.id, userId: sarah.id }
     });
   }
 
   // 5. Create Students
-  if (greenwood) {
+  if (Govt) {
     const students = [
-      { firstName: "Alice", lastName: "Johnson", classSec: "10-A", age: 15, gender: "FEMALE", eventId: greenwood.id },
-      { firstName: "Bob", lastName: "Smith", classSec: "10-B", age: 14, gender: "MALE", eventId: greenwood.id }
+      { firstName: "Rahul", lastName: "Garg", classSec: "10-A", age: 15, gender: "MALE", eventId: Govt.id },
+      { firstName: "Priya", lastName: "Sharma", classSec: "10-B", age: 14, gender: "FEMALE", eventId: Govt.id },
+      { firstName: "Amit", lastName: "Verma", classSec: "9-C", age: 14, gender: "MALE", eventId: Govt.id }
     ];
     for (const student of students) {
       await prisma.student.create({ data: student as any });
     }
   }
 
-  // 6. Create Sample Medical Record
-  const alice = await prisma.student.findFirst({ where: { firstName: "Alice" } });
-  if (alice && greenwood) {
+  // 6. Create Sample Medical Records with the 8 Sections format
+  const rahul = await prisma.student.findFirst({ where: { firstName: "Rahul" } });
+  const priya = await prisma.student.findFirst({ where: { firstName: "Priya" } });
+
+  if (rahul && Govt) {
     await prisma.medicalRecord.create({
       data: {
-        studentId: alice.id,
-        eventId: greenwood.id,
-        status: "IN_PROGRESS",
+        studentId: rahul.id,
+        eventId: Govt.id,
+        status: "COMPLETED",
         data: {
-          ent: { hearing: "Normal", earExam: "Healthy" },
-          communityMed: { height: "160", weight: "50" }
+          general_examination_merged: { height: "170", weight: "65", bmi: "22.5", bloodGroup: "B+", status_nor: "N" },
+          ent_examination: { earIssues: "YES", earIssues_details: "Minor wax buildup", status_nor: "R", doctorRemarks: "Refer to ENT specialist." },
+          dental_examination: { cavities: "NO", status_nor: "N" },
+          vaccination_details: { hepB1: "YES", status_nor: "N" },
+          symptoms: { headache: "YES", status_nor: "O", doctorRemarks: "Occasional stress-related headache." },
+          optical_examination: { visionRight: "6/6", visionLeft: "6/6", status_nor: "N" },
+          skin_examination: { skinCondition: "NO", status_nor: "N" },
+          system_wise_examination: { breathlessness: "NO", status_nor: "N" }
         }
       }
     });
