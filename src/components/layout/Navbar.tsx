@@ -11,7 +11,7 @@ export function Navbar({ role, userName }: { role: string; userName: string }) {
       <div className="flex h-16 items-center px-4 md:px-6">
         <Link href={role === 'ADMIN' ? '/admin/dashboard' : '/staff/dashboard'} className="font-extrabold text-2xl text-slate-900 tracking-tight flex items-center gap-2">
           <HeartPulse className="h-7 w-7 text-emerald-600" />
-          HealthCamp<span className="text-emerald-600">Pro</span>
+          AIIMS<span className="text-emerald-600">BATHINDA</span>
         </Link>
         <div className="ml-auto flex items-center space-x-4">
           <div className="flex flex-col items-end mr-4 hidden md:flex">
