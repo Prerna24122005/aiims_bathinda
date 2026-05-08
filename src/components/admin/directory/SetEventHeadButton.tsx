@@ -9,10 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 export function SetEventHeadButton({
   eventId,
-  medicalStaff
+  medicalStaff,
+  disabled = false
 }: {
   eventId: string,
-  medicalStaff: { id: string, fullName: string, email: string, department?: string | null }[]
+  medicalStaff: { id: string, fullName: string, email: string, department?: string | null }[],
+  disabled?: boolean
 }) {
   const [isUpdating, setIsUpdating] = useState(false);
   const [open, setOpen] = useState(false);
@@ -43,7 +45,9 @@ export function SetEventHeadButton({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
-        className="inline-flex h-8 items-center justify-center rounded-md px-3 text-sm font-medium text-amber-600 hover:text-amber-700 hover:bg-amber-50 hover:border-transparent transition-colors disabled:opacity-50 disabled:pointer-events-none"
+        className="inline-flex h-8 items-center justify-center rounded-md px-3 text-sm font-medium text-amber-600 hover:text-amber-700 hover:bg-amber-50 hover:border-transparent transition-colors disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed"
+        disabled={disabled}
+        title={disabled ? "Cannot assign event head to past events" : "Make event head"}
       >
         <Crown className="mr-1 h-3 w-3" /> Make Head
       </DialogTrigger>

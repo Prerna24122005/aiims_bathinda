@@ -19,7 +19,8 @@ type EventType = {
   eventHeadName: string;
   referredCount?: number;
   observationCount?: number;
-  _count: { eventStaff: number; students: number; }
+  studentsCount: number;
+  _count: { eventStaff: number; medicalRecords: number; }
 };
 
 export function EventsTabClient({ events, actionButton }: { events: EventType[], actionButton?: React.ReactNode }) {
@@ -219,7 +220,7 @@ export function EventsTabClient({ events, actionButton }: { events: EventType[],
                         </div>
                       </td>
                       <td className="px-4 py-4 text-center">
-                        <span className="text-sm font-semibold text-slate-700">{event._count.students}</span>
+                        <span className="text-sm font-semibold text-slate-700">{event.studentsCount || event._count.medicalRecords}</span>
                       </td>
                       <td className="px-4 py-4 text-center">
                         <span className="text-sm font-semibold text-slate-700">{event._count.eventStaff}</span>
@@ -321,7 +322,7 @@ export function EventsTabClient({ events, actionButton }: { events: EventType[],
                         </div>
                       </td>
                       <td className="px-4 py-4 text-center">
-                        <span className="text-sm font-medium text-slate-600">{event._count.students}</span>
+                        <span className="text-sm font-medium text-slate-600">{event.studentsCount || event._count.medicalRecords}</span>
                       </td>
                       <td className="px-4 py-4 text-center">
                         <span className="text-sm font-medium text-slate-600">{event._count.eventStaff}</span>

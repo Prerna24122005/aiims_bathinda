@@ -15,11 +15,13 @@ type StaffMember = {
 export function AssignStaffButton({
   eventId,
   availableStaff,
-  assignedStaffIds
+  assignedStaffIds,
+  disabled = false
 }: {
   eventId: string;
   availableStaff: StaffMember[];
   assignedStaffIds: string[];
+  disabled?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -73,8 +75,10 @@ export function AssignStaffButton({
       <Button
         variant="ghost"
         size="sm"
-        className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 h-8 font-medium"
+        className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 h-8 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
         onClick={() => setIsOpen(true)}
+        disabled={disabled}
+        title={disabled ? "Cannot assign staff to past events" : "Assign staff to this event"}
       >
         <Plus className="mr-1 h-3 w-3" /> Assign Staff
       </Button>

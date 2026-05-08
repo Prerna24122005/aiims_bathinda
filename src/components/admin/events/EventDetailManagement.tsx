@@ -196,10 +196,12 @@ export function EventDetailManagement({
                       eventId={event.id}
                       availableStaff={allMedicalStaff}
                       assignedStaffIds={assignedStaffIds}
+                      disabled={dynamicStatus === "PAST"}
                     />
                     <SetEventHeadButton
                       eventId={event.id}
                       medicalStaff={allMedicalStaff}
+                      disabled={dynamicStatus === "PAST"}
                     />
                   </div>
                 </div>
@@ -255,7 +257,7 @@ export function EventDetailManagement({
                                   )}
                                 </td>
                                 <td className="px-6 py-4 text-center">
-                                  <RemoveStaffButton eventId={event.id} userId={user.id} staffName={user.fullName} />
+                                  <RemoveStaffButton eventId={event.id} userId={user.id} staffName={user.fullName} disabled={dynamicStatus === "PAST"} />
                                 </td>
                               </tr>
                             ))
